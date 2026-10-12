@@ -8,7 +8,7 @@
 # Homes and family anchor trips: a day is away when every photo is more than 25 km from all of them.
 # Workplaces only label photos taken there.
 # Leave out valid_from for "since before any photo", and valid_to for "still true".
-# Coordinates: copy them from any map app, or from `where-was-i on DATE` on a day you were there.
+# Coordinates: copy them from any map app, or from `where-was-i on DATE --format textproto` on a day you were there.
 # The places below are made up.
 
 places {

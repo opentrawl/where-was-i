@@ -25,7 +25,7 @@ const help = `where-was-i: where you were, and which trips you took, from the pl
 
 Usage:
   where-was-i                         what's here, your latest trips and where to start
-  where-was-i trips                   every trip, newest first
+  where-was-i trips                   your trips, newest first (--all adds short stays)
   where-was-i trip LINK|DATE          one trip, day by day (LINK looks like trip:2024-05-03)
   where-was-i on DATE                 one day, stretch by stretch, in local time and UTC
   where-was-i days                    the latest days, one line each

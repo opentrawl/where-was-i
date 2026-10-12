@@ -115,7 +115,9 @@ func nightText(n *wherewasiv1.Night) string {
 		return ""
 	}
 	chosen := placeLabel(n.KnownPlaceKind, n.Place, true)
-	if n.Source == wherewasiv1.NightSource_NIGHT_SOURCE_HOME_OR_FAMILY || n.NextMorningPlace == nil ||
+	// Show both ends only when the night was placed by the next morning's photo; otherwise the text would disagree
+	// with the place the night counts as.
+	if n.Source != wherewasiv1.NightSource_NIGHT_SOURCE_NEXT_MORNING || n.NextMorningPlace == nil ||
 		townName(n.LastEveningPlace) == townName(n.NextMorningPlace) {
 		return chosen
 	}
@@ -237,7 +239,7 @@ func Overview(out io.Writer, o *wherewasiv1.Overview) error {
 	}
 	w.line("")
 	w.line("Start here")
-	hints := [][2]string{{Command + " trips", "every trip"}}
+	hints := [][2]string{{Command + " trips", "your trips, newest first"}}
 	if len(o.LatestTrips) > 0 {
 		hints = append(hints, [2]string{Command + " trip " + o.LatestTrips[0].Link, "one trip, day by day"})
 	}
@@ -352,7 +354,11 @@ func Day(out io.Writer, d *wherewasiv1.DayTimeline) error {
 		offsets = appendNew(offsets, offsetName(v.Start.UtcOffsetSeconds))
 	}
 	first := d.Visits[0].Place
-	heading := []string{dayLabel(d.LocalDay), firstNonEmpty(first.Country, "")}
+	var countries []string
+	for _, v := range d.Visits {
+		countries = appendNew(countries, v.Place.Country)
+	}
+	heading := []string{dayLabel(d.LocalDay), strings.Join(countries, ", ")}
 	if d.TripLink != "" {
 		heading = append(heading, "on "+d.TripLink)
 	}

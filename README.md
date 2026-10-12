@@ -123,7 +123,7 @@ curl -fsSL https://github.com/opentrawl/where-was-i/releases/latest/download/whe
 where-was-i
 ```
 
-The first run may ask for Full Disk Access. macOS protects the Photos library, and the error says where to turn it on: System Settings, Privacy & Security, Full Disk Access, for the app you run it in (Terminal, Ghostty, your editor). Then restart that app.
+The first run may ask for Full Disk Access. macOS protects the Photos library, and the error says where to turn it on: System Settings, Privacy & Security, Full Disk Access, for the app you run it in (Terminal, Ghostty, your editor). Then restart that app. If your agent works on the Mac over SSH, turn on "Allow full disk access for remote users" under System Settings, General, Sharing, Remote Login instead.
 
 To build from source instead: `go install github.com/opentrawl/where-was-i/cmd/where-was-i@latest`. This needs Xcode's command-line tools.
 
