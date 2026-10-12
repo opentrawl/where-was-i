@@ -23,6 +23,7 @@ const (
 	DayStartsAt                  = 4 * time.Hour // a local day runs from 04:00 to 04:00, so a late evening stays with its evening
 	MorningEndsAt                = 12            // the next day's first photo counts as "where you woke up" before this hour
 	MaxNightsWithoutPhotosInTrip = 2             // nights without photos a trip may bridge
+	TravellingNightKm            = 300           // evening and next-morning photos this far apart mean the night was spent travelling
 )
 
 // Date is a local calendar day, held as midnight UTC so it compares and sorts simply.

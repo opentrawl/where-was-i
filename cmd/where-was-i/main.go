@@ -24,22 +24,22 @@ import (
 const help = `where-was-i: where you were, and which trips you took, from the places Apple Photos stored for your photos.
 
 Usage:
-  where-was-i                         what's here, your latest trips and where to start
-  where-was-i trips                   your trips, newest first (--all adds short stays)
-  where-was-i trip LINK|DATE          one trip, day by day (LINK looks like trip:2024-05-03)
-  where-was-i on DATE                 one day, stretch by stretch, in local time and UTC
+  where-was-i                         your latest trips, and the commands to go further
+  where-was-i trips                   your trips, newest first
+  where-was-i trip DATE               one trip, day by day: any date on it, such as the day you left
+  where-was-i on DATE                 one day: where you were and when, in local time and UTC
   where-was-i days                    the latest days, one line each
-  where-was-i in PLACE                every day in a country, region, town or landmark Apple names
+  where-was-i in PLACE                your visits to a country, region, town or landmark
   where-was-i years                   nights at home, with family and away, by year
 
 Flags:
-  --from DATE, --to DATE              limit trips, days and places to a range (DATE is YYYY-MM-DD)
+  --from DATE, --to DATE              only trips, days and visits in this range of dates (YYYY-MM-DD)
   --limit N                           how many rows to show (default 10)
-  --all                               trips: include stays with no morning photo away, often a long day out
+  --all                               trips: also list one-night stays where no photo shows you waking up away
   --format human|textproto            textproto prints the typed messages: every field, down to each photo
   --version                           print the version
   --library PATH                      a Photos.sqlite other than your system library
-  --known-places PATH                 homes, family and work over time (default ~/.config/where-was-i/known-places.textproto)
+  --known-places PATH                 your homes, family homes and workplaces, with dates (default ~/.config/where-was-i/known-places.textproto)
 
 Agents: output sent to another program is never wrapped, one row per line. Lists say how many rows they show
 and how to see more. --format textproto gives every field.

@@ -38,6 +38,7 @@ func (x *Index) workOutNights() {
 			LastEveningPlace: TownLevel(evening.proto.Place)}
 		if next != nil {
 			n.NextMorningPlace = TownLevel(next.proto.Place)
+			n.Travelling = kmBetween(evening.proto.Location, next.proto.Location) > TravellingNightKm
 		}
 		x.nights[day] = &night{photo: chosen, proto: n}
 	}
@@ -87,21 +88,26 @@ func (x *Index) workOutTrips() {
 func (x *Index) newTrip(left, back Date) *trip {
 	t := &wherewasiv1.Trip{Link: "trip:" + left.Format("2006-01-02"), Left: left.Proto(), Back: back.Proto(), Nights: int32(left.DaysUntil(back))}
 	for day := left; day.Before(back.Time); day = day.Next() {
+		stop := &wherewasiv1.Stop{FirstEvening: day.Proto(), Nights: 1}
 		n, has := x.nights[day]
-		if !has {
+		switch {
+		case !has:
 			t.NightsWithoutPhotos++
-			continue
+			stop.NoPhotos = true
+		case n.proto.Travelling:
+			stop.Travelling = true
+		default:
+			stop.Place, stop.KnownPlace, stop.KnownPlaceKind = n.proto.Place, n.proto.KnownPlace, n.proto.KnownPlaceKind
+			t.Countries = appendNew(t.Countries, n.proto.Place.Country)
 		}
-		if n.proto.Source == wherewasiv1.NightSource_NIGHT_SOURCE_NEXT_MORNING {
+		if has && n.proto.Source == wherewasiv1.NightSource_NIGHT_SOURCE_NEXT_MORNING {
 			t.NightsConfirmedByMorning++
 		}
-		if stops := t.Stops; len(stops) > 0 && townKey(stops[len(stops)-1].Place) == townKey(n.proto.Place) {
+		if stops := t.Stops; len(stops) > 0 && sameStop(stops[len(stops)-1], stop) {
 			stops[len(stops)-1].Nights++
 		} else {
-			t.Stops = append(t.Stops, &wherewasiv1.Stop{Place: n.proto.Place, KnownPlace: n.proto.KnownPlace,
-				KnownPlaceKind: n.proto.KnownPlaceKind, FirstEvening: day.Proto(), Nights: 1})
+			t.Stops = append(t.Stops, stop)
 		}
-		t.Countries = appendNew(t.Countries, n.proto.Place.Country)
 	}
 	for day := left; !day.After(back.Time); day = day.Next() {
 		t.PhotoCount += int32(len(x.byDay[day]))
@@ -112,6 +118,13 @@ func (x *Index) newTrip(left, back Date) *trip {
 		}
 	}
 	return &trip{proto: t, left: left, back: back}
+}
+
+func sameStop(a, b *wherewasiv1.Stop) bool {
+	if a.Travelling || b.Travelling || a.NoPhotos || b.NoPhotos {
+		return a.Travelling == b.Travelling && a.NoPhotos == b.NoPhotos
+	}
+	return townKey(a.Place) == townKey(b.Place)
 }
 
 // tripOn is the trip a day belongs to, from the day you left to the day you got back.

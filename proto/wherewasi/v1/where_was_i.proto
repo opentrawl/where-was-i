@@ -136,6 +136,8 @@ message Night {
   NightSource source = 5;
   Place last_evening_place = 6;    // town level, where the evening's last photo was taken
   Place next_morning_place = 7;    // town level, where the next day's first photo was taken; unset when there is none
+  bool travelling = 10;            // the evening's and next morning's photos are far apart: an overnight flight, train
+                                   // or drive. Such a night is not a stop and adds no country to a trip.
 }
 
 // Consecutive nights in one town.
@@ -145,6 +147,8 @@ message Stop {
   KnownPlaceKind known_place_kind = 5;
   CalendarDate first_evening = 3;
   int32 nights = 4;
+  bool travelling = 6;             // nights on the move; place is unset
+  bool no_photos = 7;              // nights with no photo either side; place is unset
 }
 
 // Nights away in a row, from the day you left to the day you got back. Up to a set number of nights without photos
@@ -155,7 +159,8 @@ message Trip {
   CalendarDate back = 3;           // the day after the last night away
   int32 nights = 4;
   int32 nights_without_photos = 5;
-  repeated string countries = 6;  // countries of the stops, in order: where nights were spent, not fly-overs
+  repeated string countries = 6;  // countries of the stops, in order: where nights were spent, not fly-overs or
+                                   // overnight travel
   repeated Stop stops = 7;
   int32 photo_count = 8;
   repeated string apple_trip_titles = 9;

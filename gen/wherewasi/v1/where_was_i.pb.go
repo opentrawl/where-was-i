@@ -994,6 +994,7 @@ type Night struct {
 	Source           NightSource            `protobuf:"varint,5,opt,name=source,proto3,enum=wherewasi.v1.NightSource" json:"source,omitempty"`
 	LastEveningPlace *Place                 `protobuf:"bytes,6,opt,name=last_evening_place,json=lastEveningPlace,proto3" json:"last_evening_place,omitempty"` // town level, where the evening's last photo was taken
 	NextMorningPlace *Place                 `protobuf:"bytes,7,opt,name=next_morning_place,json=nextMorningPlace,proto3" json:"next_morning_place,omitempty"` // town level, where the next day's first photo was taken; unset when there is none
+	Travelling       bool                   `protobuf:"varint,10,opt,name=travelling,proto3" json:"travelling,omitempty"`                                     // the evening's and next morning's photos are far apart: an overnight flight, train
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -1091,6 +1092,13 @@ func (x *Night) GetNextMorningPlace() *Place {
 	return nil
 }
 
+func (x *Night) GetTravelling() bool {
+	if x != nil {
+		return x.Travelling
+	}
+	return false
+}
+
 // Consecutive nights in one town.
 type Stop struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
@@ -1099,6 +1107,8 @@ type Stop struct {
 	KnownPlaceKind KnownPlaceKind         `protobuf:"varint,5,opt,name=known_place_kind,json=knownPlaceKind,proto3,enum=wherewasi.v1.KnownPlaceKind" json:"known_place_kind,omitempty"`
 	FirstEvening   *CalendarDate          `protobuf:"bytes,3,opt,name=first_evening,json=firstEvening,proto3" json:"first_evening,omitempty"`
 	Nights         int32                  `protobuf:"varint,4,opt,name=nights,proto3" json:"nights,omitempty"`
+	Travelling     bool                   `protobuf:"varint,6,opt,name=travelling,proto3" json:"travelling,omitempty"`             // nights on the move; place is unset
+	NoPhotos       bool                   `protobuf:"varint,7,opt,name=no_photos,json=noPhotos,proto3" json:"no_photos,omitempty"` // nights with no photo either side; place is unset
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -1168,20 +1178,35 @@ func (x *Stop) GetNights() int32 {
 	return 0
 }
 
+func (x *Stop) GetTravelling() bool {
+	if x != nil {
+		return x.Travelling
+	}
+	return false
+}
+
+func (x *Stop) GetNoPhotos() bool {
+	if x != nil {
+		return x.NoPhotos
+	}
+	return false
+}
+
 // Nights away in a row, from the day you left to the day you got back. Up to a set number of nights without photos
 // may sit inside a trip. Naming trips is left to whoever reads them; Apple's own titles are passed through.
 type Trip struct {
-	state                    protoimpl.MessageState `protogen:"open.v1"`
-	Link                     string                 `protobuf:"bytes,1,opt,name=link,proto3" json:"link,omitempty"` // "trip:2024-05-03", the day you left
-	Left                     *CalendarDate          `protobuf:"bytes,2,opt,name=left,proto3" json:"left,omitempty"` // the day of the first night away
-	Back                     *CalendarDate          `protobuf:"bytes,3,opt,name=back,proto3" json:"back,omitempty"` // the day after the last night away
-	Nights                   int32                  `protobuf:"varint,4,opt,name=nights,proto3" json:"nights,omitempty"`
-	NightsWithoutPhotos      int32                  `protobuf:"varint,5,opt,name=nights_without_photos,json=nightsWithoutPhotos,proto3" json:"nights_without_photos,omitempty"`
-	Countries                []string               `protobuf:"bytes,6,rep,name=countries,proto3" json:"countries,omitempty"` // countries of the stops, in order: where nights were spent, not fly-overs
-	Stops                    []*Stop                `protobuf:"bytes,7,rep,name=stops,proto3" json:"stops,omitempty"`
-	PhotoCount               int32                  `protobuf:"varint,8,opt,name=photo_count,json=photoCount,proto3" json:"photo_count,omitempty"`
-	AppleTripTitles          []string               `protobuf:"bytes,9,rep,name=apple_trip_titles,json=appleTripTitles,proto3" json:"apple_trip_titles,omitempty"`
-	NightsConfirmedByMorning int32                  `protobuf:"varint,10,opt,name=nights_confirmed_by_morning,json=nightsConfirmedByMorning,proto3" json:"nights_confirmed_by_morning,omitempty"` // nights where the next morning's first photo was taken away from home
+	state               protoimpl.MessageState `protogen:"open.v1"`
+	Link                string                 `protobuf:"bytes,1,opt,name=link,proto3" json:"link,omitempty"` // "trip:2024-05-03", the day you left
+	Left                *CalendarDate          `protobuf:"bytes,2,opt,name=left,proto3" json:"left,omitempty"` // the day of the first night away
+	Back                *CalendarDate          `protobuf:"bytes,3,opt,name=back,proto3" json:"back,omitempty"` // the day after the last night away
+	Nights              int32                  `protobuf:"varint,4,opt,name=nights,proto3" json:"nights,omitempty"`
+	NightsWithoutPhotos int32                  `protobuf:"varint,5,opt,name=nights_without_photos,json=nightsWithoutPhotos,proto3" json:"nights_without_photos,omitempty"`
+	Countries           []string               `protobuf:"bytes,6,rep,name=countries,proto3" json:"countries,omitempty"` // countries of the stops, in order: where nights were spent, not fly-overs or
+	// overnight travel
+	Stops                    []*Stop  `protobuf:"bytes,7,rep,name=stops,proto3" json:"stops,omitempty"`
+	PhotoCount               int32    `protobuf:"varint,8,opt,name=photo_count,json=photoCount,proto3" json:"photo_count,omitempty"`
+	AppleTripTitles          []string `protobuf:"bytes,9,rep,name=apple_trip_titles,json=appleTripTitles,proto3" json:"apple_trip_titles,omitempty"`
+	NightsConfirmedByMorning int32    `protobuf:"varint,10,opt,name=nights_confirmed_by_morning,json=nightsConfirmedByMorning,proto3" json:"nights_confirmed_by_morning,omitempty"` // nights where the next morning's first photo was taken away from home
 	unknownFields            protoimpl.UnknownFields
 	sizeCache                protoimpl.SizeCache
 }
@@ -2139,7 +2164,7 @@ const file_wherewasi_v1_where_was_i_proto_rawDesc = "" +
 	"\vphoto_count\x18\b \x01(\x05R\n" +
 	"photoCount\x12F\n" +
 	"\x10known_place_kind\x18\t \x01(\x0e2\x1c.wherewasi.v1.KnownPlaceKindR\x0eknownPlaceKindB\x0f\n" +
-	"\r_km_from_home\"\xbd\x03\n" +
+	"\r_km_from_home\"\xdd\x03\n" +
 	"\x05Night\x124\n" +
 	"\aevening\x18\x01 \x01(\v2\x1a.wherewasi.v1.CalendarDateR\aevening\x12)\n" +
 	"\x05place\x18\x02 \x01(\v2\x13.wherewasi.v1.PlaceR\x05place\x12\x1f\n" +
@@ -2151,14 +2176,22 @@ const file_wherewasi_v1_where_was_i_proto_rawDesc = "" +
 	"home_known\x18\b \x01(\bR\thomeKnown\x121\n" +
 	"\x06source\x18\x05 \x01(\x0e2\x19.wherewasi.v1.NightSourceR\x06source\x12A\n" +
 	"\x12last_evening_place\x18\x06 \x01(\v2\x13.wherewasi.v1.PlaceR\x10lastEveningPlace\x12A\n" +
-	"\x12next_morning_place\x18\a \x01(\v2\x13.wherewasi.v1.PlaceR\x10nextMorningPlace\"\xf3\x01\n" +
+	"\x12next_morning_place\x18\a \x01(\v2\x13.wherewasi.v1.PlaceR\x10nextMorningPlace\x12\x1e\n" +
+	"\n" +
+	"travelling\x18\n" +
+	" \x01(\bR\n" +
+	"travelling\"\xb0\x02\n" +
 	"\x04Stop\x12)\n" +
 	"\x05place\x18\x01 \x01(\v2\x13.wherewasi.v1.PlaceR\x05place\x12\x1f\n" +
 	"\vknown_place\x18\x02 \x01(\tR\n" +
 	"knownPlace\x12F\n" +
 	"\x10known_place_kind\x18\x05 \x01(\x0e2\x1c.wherewasi.v1.KnownPlaceKindR\x0eknownPlaceKind\x12?\n" +
 	"\rfirst_evening\x18\x03 \x01(\v2\x1a.wherewasi.v1.CalendarDateR\ffirstEvening\x12\x16\n" +
-	"\x06nights\x18\x04 \x01(\x05R\x06nights\"\x9a\x03\n" +
+	"\x06nights\x18\x04 \x01(\x05R\x06nights\x12\x1e\n" +
+	"\n" +
+	"travelling\x18\x06 \x01(\bR\n" +
+	"travelling\x12\x1b\n" +
+	"\tno_photos\x18\a \x01(\bR\bnoPhotos\"\x9a\x03\n" +
 	"\x04Trip\x12\x12\n" +
 	"\x04link\x18\x01 \x01(\tR\x04link\x12.\n" +
 	"\x04left\x18\x02 \x01(\v2\x1a.wherewasi.v1.CalendarDateR\x04left\x12.\n" +
