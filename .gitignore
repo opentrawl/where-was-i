@@ -1,0 +1,4 @@
+.devenv/
+.devenv.flake.nix
+/where-was-i
+/dist/

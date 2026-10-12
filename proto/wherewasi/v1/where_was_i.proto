@@ -1,0 +1,249 @@
+syntax = "proto3";
+
+// Where you were, and when, built mechanically from the places Apple Photos stored for your photos. No field holds a
+// judgement: places are Apple's, times come from the time-zone map, and statuses are distance tests against known
+// places.
+package wherewasi.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/opentrawl/where-was-i/gen/wherewasi/v1;wherewasiv1";
+
+message CalendarDate {
+  int32 year = 1;
+  int32 month = 2;
+  int32 day = 3;
+}
+
+message LatLng {
+  double latitude = 1;
+  double longitude = 2;
+}
+
+enum ZoneSource {
+  ZONE_SOURCE_UNSPECIFIED = 0;
+  ZONE_SOURCE_TIME_ZONE_MAP = 1;   // the legal zone at the photo's position, from the built-in time-zone map
+  ZONE_SOURCE_UNKNOWN = 2;         // the map had no zone; local time is shown as UTC
+}
+
+// An exact instant together with the local clock where you were.
+message LocalTime {
+  google.protobuf.Timestamp utc = 1;
+  int32 utc_offset_seconds = 2;
+  string zone_name = 3;            // IANA name, for example "Europe/London"
+  ZoneSource zone_source = 4;
+  string local = 5;                // the same instant on the local clock, RFC 3339: "2024-05-04T09:12:00+09:00"
+}
+
+enum DeviceOffsetSource {
+  DEVICE_OFFSET_SOURCE_UNSPECIFIED = 0;
+  DEVICE_OFFSET_SOURCE_PHOTO = 1;           // the offset Apple stored with the photo
+  DEVICE_OFFSET_SOURCE_APPLE_INFERRED = 2;  // the offset Apple inferred when the file carried none
+}
+
+// The camera clock's offset as Apple recorded it. It follows the device, not the place, so it lags on travel days.
+message DeviceOffset {
+  int32 utc_offset_seconds = 1;
+  DeviceOffsetSource source = 2;
+}
+
+enum KnownPlaceKind {
+  KNOWN_PLACE_KIND_UNSPECIFIED = 0;
+  KNOWN_PLACE_KIND_HOME = 1;
+  KNOWN_PLACE_KIND_FAMILY = 2;
+  KNOWN_PLACE_KIND_WORK = 3;
+  KNOWN_PLACE_KIND_OTHER = 4;
+}
+
+enum KnownPlaceSource {
+  KNOWN_PLACE_SOURCE_UNSPECIFIED = 0;
+  KNOWN_PLACE_SOURCE_FILE = 1;          // from the known-places file
+  KNOWN_PLACE_SOURCE_APPLE_HOME = 2;    // from the photos Apple Photos marks as taken at home
+}
+
+// A place that matters to you over time: a home, family, work. Optional; without a file, home is where Apple Photos
+// says it is.
+message KnownPlace {
+  string label = 1;
+  KnownPlaceKind kind = 2;
+  LatLng location = 3;             // unset when the address is known but not its position
+  CalendarDate valid_from = 4;     // unset: since before any photo
+  CalendarDate valid_to = 5;       // unset: still true
+  string evidence = 6;
+  KnownPlaceSource source = 7;
+}
+
+message KnownPlaces {
+  repeated KnownPlace places = 1;
+}
+
+// The place Apple Photos stored for a photo, field by field. Apple's levels differ by country: state is a province in
+// Spain and the Netherlands, a prefecture in Japan, a state in the US and "England" in the UK.
+message Place {
+  string country_code = 1;         // ISO 3166-1 alpha-2, "ES"
+  string country = 2;
+  string state = 3;                // Apple's administrative area
+  string county = 4;               // Apple's sub-administrative area
+  string town = 5;                 // Apple's city, which is sometimes the postal town
+  string neighbourhood = 6;        // Apple's sub-locality
+  string street = 7;
+  string point_of_interest = 8;    // the smallest park, landmark or venue Apple named
+  string water = 9;                // the smallest sea, lake, river or fjord Apple named
+  string island = 10;
+  string full_address = 11;        // Apple's address string, unchanged
+  repeated string regions = 12;    // every wider area Apple named, smallest first: "Highlands", "Kansai", "Home Counties"
+}
+
+// One located photo.
+message LocatedPhoto {
+  LocalTime time = 1;
+  DeviceOffset device_offset = 2;  // unset for the few photos Apple has no offset for
+  LatLng location = 3;
+  Place place = 4;
+  string photo_uuid = 5;
+}
+
+// A stretch of consecutive photos in one town and neighbourhood, and at the same known place or none, within one
+// local day.
+message Visit {
+  LocalTime start = 1;
+  LocalTime end = 2;
+  Place place = 3;                 // town level
+  repeated string neighbourhoods = 4;
+  repeated string points_of_interest = 5;
+  string known_place = 6;          // label of the known place it was at, if any
+  optional double km_from_home = 7;
+  int32 photo_count = 8;
+  KnownPlaceKind known_place_kind = 9;
+}
+
+enum NightSource {
+  NIGHT_SOURCE_UNSPECIFIED = 0;
+  NIGHT_SOURCE_HOME_OR_FAMILY = 1; // the evening's last photo or the next day's first was at a home or family place
+  NIGHT_SOURCE_NEXT_MORNING = 2;   // where the next day's first photo, before noon, was taken
+  NIGHT_SOURCE_LAST_EVENING = 3;   // no photo the next morning; where the evening's last photo was taken
+}
+
+// Where you spent the night after a local day, as far as photos show. The evening's last photo and the next day's
+// first photo are both kept; the night's place is the one the rule below picked.
+message Night {
+  CalendarDate evening = 1;        // the local day the night follows
+  Place place = 2;                 // town level
+  string known_place = 3;
+  KnownPlaceKind known_place_kind = 9;
+  bool away = 4;                   // beyond the away distance from every home and family place
+  bool home_known = 8;             // false when no home is known for that date, so away can't be told
+  NightSource source = 5;
+  Place last_evening_place = 6;    // town level, where the evening's last photo was taken
+  Place next_morning_place = 7;    // town level, where the next day's first photo was taken; unset when there is none
+}
+
+// Consecutive nights in one town.
+message Stop {
+  Place place = 1;                 // town level
+  string known_place = 2;
+  KnownPlaceKind known_place_kind = 5;
+  CalendarDate first_evening = 3;
+  int32 nights = 4;
+}
+
+// Nights away in a row, from the day you left to the day you got back. Up to a set number of nights without photos
+// may sit inside a trip. Naming trips is left to whoever reads them; Apple's own titles are passed through.
+message Trip {
+  string link = 1;                 // "trip:2024-05-03", the day you left
+  CalendarDate left = 2;           // the day of the first night away
+  CalendarDate back = 3;           // the day after the last night away
+  int32 nights = 4;
+  int32 nights_without_photos = 5;
+  repeated string countries = 6;  // countries of the stops, in order: where nights were spent, not fly-overs
+  repeated Stop stops = 7;
+  int32 photo_count = 8;
+  repeated string apple_trip_titles = 9;
+  int32 nights_confirmed_by_morning = 10; // nights where the next morning's first photo was taken away from home
+}
+
+// One day of a trip.
+message ItineraryDay {
+  CalendarDate local_day = 1;
+  repeated Place towns_in_order = 2;     // town level, in time order; consecutive repeats merged
+  repeated string points_of_interest = 3;
+  Night night = 4;                       // unset on the day you got back, and on nights without photos
+  int32 photo_count = 5;
+  repeated int32 utc_offsets_seen_seconds = 6;
+}
+
+message Itinerary {
+  Trip trip = 1;
+  repeated ItineraryDay days = 2;
+}
+
+// One day, stretch by stretch.
+message DayTimeline {
+  CalendarDate local_day = 1;
+  string trip_link = 2;                  // the trip this day belongs to, if any
+  optional double max_km_from_home = 3;
+  repeated Visit visits = 4;
+  Night night = 5;
+  repeated LocatedPhoto photos = 6;      // every photo, for agents that want the raw records
+}
+
+// Consecutive days with photos in the place asked for, bridging the same gaps a trip may. A stay inside a trip
+// carries the trip's link.
+message PlaceStay {
+  CalendarDate first_day = 1;
+  CalendarDate last_day = 2;
+  int32 days_with_photos = 3;
+  repeated Place towns_in_order = 4;     // town level, the matching photos' towns, each once
+  string matched_field = 5;              // which of Apple's fields matched: "country", "region", "town" and so on
+  string trip_link = 6;
+  int32 photo_count = 7;
+  string matched_value = 8;              // Apple's name that matched, for example "Kruger National Park"
+}
+
+message PlaceDays {
+  string place_asked_for = 1;
+  repeated PlaceStay stays = 2;          // newest first
+  int32 total_stays = 3;
+  int32 total_days = 4;
+}
+
+message CountryNights {
+  string country = 1;
+  int32 nights = 2;
+}
+
+// A year's nights by where they were spent. Nights without photos are counted, not guessed.
+message Year {
+  int32 year = 1;
+  int32 nights_at_home = 2;
+  int32 nights_with_family = 3;
+  int32 nights_away = 4;
+  int32 nights_near_home = 5;            // not at a known place, but within the away distance of one
+  int32 nights_without_photos = 6;
+  repeated CountryNights away_by_country = 7;
+  int32 nights_home_unknown = 8;         // nights with photos before any home is known, so away can't be told
+}
+
+message Years {
+  repeated Year years = 1;
+}
+
+message Overview {
+  int32 located_photos = 1;
+  CalendarDate first_day = 2;
+  CalendarDate last_day = 3;
+  KnownPlace current_home = 4;
+  repeated Trip latest_trips = 5;
+  int32 total_trips = 6;
+}
+
+message Trips {
+  repeated Trip trips = 1;
+  int32 total_trips = 2;
+  int32 unconfirmed_trips_left_out = 3;  // trips with no night confirmed by a morning photo away; shown with --all
+}
+
+message Days {
+  repeated ItineraryDay days = 1;
+  int32 total_days = 2;                  // days with photos in the range, of which `days` shows the newest
+}

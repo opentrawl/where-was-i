@@ -1,0 +1,37 @@
+# Known places: where you lived, stayed and worked, with the dates each applied. Optional.
+#
+# Without this file, home is where Apple Photos says it is, and Apple only knows your current home. Add earlier homes,
+# family you stay with, and workplaces so older trips and days come out right.
+#
+# Copy it to ~/.config/where-was-i/known-places.textproto, or pass --known-places PATH.
+# kind: KNOWN_PLACE_KIND_HOME, KNOWN_PLACE_KIND_FAMILY, KNOWN_PLACE_KIND_WORK or KNOWN_PLACE_KIND_OTHER.
+# Homes and family anchor trips: a day is away when every photo is more than 25 km from all of them.
+# Workplaces only label photos taken there.
+# Leave out valid_from for "since before any photo", and valid_to for "still true".
+# Coordinates: copy them from any map app, or from `where-was-i on DATE` on a day you were there.
+# The places below are made up.
+
+places {
+  label: "Flat in Leith"
+  kind: KNOWN_PLACE_KIND_HOME
+  location { latitude: 55.9750 longitude: -3.1700 }
+  valid_to { year: 2021 month: 8 day: 31 }
+}
+places {
+  label: "Home"
+  kind: KNOWN_PLACE_KIND_HOME
+  location { latitude: 51.5450 longitude: -0.0550 }
+  valid_from { year: 2021 month: 9 day: 1 }
+}
+places {
+  label: "Mum and Dad"
+  kind: KNOWN_PLACE_KIND_FAMILY
+  location { latitude: 53.4808 longitude: -2.2426 }
+}
+places {
+  label: "Office"
+  kind: KNOWN_PLACE_KIND_WORK
+  location { latitude: 51.5154 longitude: -0.0922 }
+  valid_from { year: 2022 month: 3 day: 1 }
+  evidence: "Weekday photos cluster here"
+}
