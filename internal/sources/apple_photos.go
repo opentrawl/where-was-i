@@ -33,7 +33,7 @@ var ErrNoFullDiskAccess = errors.New("macOS won't let this app read the Photos l
 // smallest named point of interest, water and island from Apple's typed list of surrounding places.
 type StoredPlace struct {
 	Country, CountryCode, State, County, Town, Neighbourhood, Street string
-	PointOfInterest, Water, Island                                   string
+	PointOfInterest, Water, Island, Road                             string
 	Address                                                          string
 	Regions                                                          []string // Apple's administrative and informal areas, smallest first
 	AppleMarksAsHome                                                 bool
@@ -47,6 +47,7 @@ const (
 	applePlaceTypePointOfInterest    = 8
 	applePlaceTypeWater              = 9
 	applePlaceTypeIsland             = 11
+	applePlaceTypeRoad               = 12 // a street, road or trail, without a house number
 )
 
 // LibraryPhoto is one visible, untrashed photo or video the library's owner took.
@@ -278,6 +279,8 @@ func decodeStoredPlace(blob []byte) *StoredPlace {
 					place.PointOfInterest = firstNonEmpty(place.PointOfInterest, name)
 				case applePlaceTypeWater, applePlaceTypeOcean:
 					place.Water = firstNonEmpty(place.Water, name)
+				case applePlaceTypeRoad:
+					place.Road = firstNonEmpty(place.Road, name)
 				case applePlaceTypeIsland:
 					place.Island = firstNonEmpty(place.Island, name)
 				case applePlaceTypeAdministrativeArea, applePlaceTypeInformalRegion:

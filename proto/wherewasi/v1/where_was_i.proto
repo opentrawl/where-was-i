@@ -92,6 +92,7 @@ message Place {
   string island = 10;
   string full_address = 11;        // Apple's address string, unchanged
   repeated string regions = 12;    // every wider area Apple named, smallest first: "Highlands", "Kansai", "Home Counties"
+  string road = 13;                // the street, road or trail Apple named, without a house number
 }
 
 // One located photo.
@@ -106,15 +107,17 @@ message LocatedPhoto {
 // A stretch of consecutive photos in one town and neighbourhood, and at the same known place or none, within one
 // local day.
 message Visit {
+  reserved 5;
   LocalTime start = 1;
   LocalTime end = 2;
   Place place = 3;                 // town level
   repeated string neighbourhoods = 4;
-  repeated string points_of_interest = 5;
   string known_place = 6;          // label of the known place it was at, if any
   optional double km_from_home = 7;
   int32 photo_count = 8;
   KnownPlaceKind known_place_kind = 9;
+  string place_name = 10;          // the town, or the area you moved through, as in ItineraryDay
+  repeated Spot spots = 11;        // where you stopped in this stretch, in time order
 }
 
 enum NightSource {
@@ -138,6 +141,10 @@ message Night {
   Place next_morning_place = 7;    // town level, where the next day's first photo was taken; unset when there is none
   bool travelling = 10;            // the evening's and next morning's photos are far apart: an overnight flight, train
                                    // or drive. Such a night is not a stop and adds no country to a trip.
+  string point_of_interest = 11;  // Apple's point of interest for the photo that placed the night, if any
+  LocalTime last_evening_time = 12;
+  LocalTime next_morning_time = 13; // unset when there is no photo the next day
+  optional double km_between_evening_and_morning = 14;
 }
 
 // Consecutive nights in one town.
@@ -153,6 +160,12 @@ message Stop {
 
 // Nights away in a row, from the day you left to the day you got back. Up to a set number of nights without photos
 // may sit inside a trip. Naming trips is left to whoever reads them; Apple's own titles are passed through.
+// A name Apple gave where some of your photos were taken, and how many photos have it.
+message NamedPlace {
+  string name = 1;
+  int32 photo_count = 2;
+}
+
 message Trip {
   string link = 1;                 // "trip:2024-05-03", the day you left
   CalendarDate left = 2;           // the day of the first night away
@@ -165,16 +178,52 @@ message Trip {
   int32 photo_count = 8;
   repeated string apple_trip_titles = 9;
   int32 nights_confirmed_by_morning = 10; // nights where the next morning's first photo was taken away from home
+  repeated NamedPlace places_in_order = 11; // every place a day of the trip went to, in the order first seen, with how
+                                            // many photos it has on those days
+  repeated string route = 12;               // the ten of those with most photos, in the order you went
 }
 
 // One day of a trip.
 message ItineraryDay {
+  reserved 2, 3, 8, 9;
   CalendarDate local_day = 1;
-  repeated Place towns_in_order = 2;     // town level, in time order; consecutive repeats merged
-  repeated string points_of_interest = 3;
   Night night = 4;                       // unset on the day you got back, and on nights without photos
   int32 photo_count = 5;
   repeated int32 utc_offsets_seen_seconds = 6;
+  repeated DayPlace places = 7;          // where the day's photos were taken, in the order first seen
+}
+
+enum DayPlaceKind {
+  DAY_PLACE_KIND_UNSPECIFIED = 0;
+  DAY_PLACE_KIND_TOWN = 1;
+  DAY_PLACE_KIND_AREA = 2;               // a point of interest you moved through: its photos that day are more than
+                                         // 2 km apart, as in a national park
+}
+
+// A town, or an area you moved through, and what you did in it that day.
+message DayPlace {
+  string name = 1;
+  DayPlaceKind kind = 2;
+  int32 photo_count = 3;
+  bool went_to = 4;                      // it holds a quarter or more of the day's photos
+  repeated Spot spots = 5;               // where you stopped in it, most photos first
+  repeated NamedPlace neighbourhoods = 6; // Apple's neighbourhoods in it, most photos first
+  Place region = 7;                      // the country, state and county of its first photo
+}
+
+enum SpotKind {
+  SPOT_KIND_UNSPECIFIED = 0;
+  SPOT_KIND_POINT_OF_INTEREST = 1;       // a landmark, museum, venue or viewpoint Apple named
+  SPOT_KIND_ROAD = 2;                    // a street, road or trail Apple named, which in a park is often a trail
+}
+
+// Somewhere you stopped: a road or point of interest whose photos that day are within 2 km of each other. A road you
+// drove along, or a park you moved through, is not a spot.
+message Spot {
+  string name = 1;
+  SpotKind kind = 2;
+  int32 photo_count = 3;
+  string neighbourhood = 4;              // Apple's neighbourhood for its first photo, if any
 }
 
 message Itinerary {

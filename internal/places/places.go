@@ -23,7 +23,9 @@ const (
 	DayStartsAt                  = 4 * time.Hour // a local day runs from 04:00 to 04:00, so a late evening stays with its evening
 	MorningEndsAt                = 12            // the next day's first photo counts as "where you woke up" before this hour
 	MaxNightsWithoutPhotosInTrip = 2             // nights without photos a trip may bridge
-	TravellingNightKm            = 300           // evening and next-morning photos this far apart mean the night was spent travelling
+	PointOfInterestIsAnAreaKm    = 2
+	WentToShareOfPhotos          = 0.25 // a place a day went to holds at least this share of its photos
+	TravellingNightKm            = 300  // evening and next-morning photos this far apart mean the night was spent travelling
 )
 
 // Date is a local calendar day, held as midnight UTC so it compares and sorts simply.
@@ -183,7 +185,7 @@ func placeFromApple(stored *sources.StoredPlace) *wherewasiv1.Place {
 	}
 	return &wherewasiv1.Place{CountryCode: stored.CountryCode, Country: stored.Country, State: stored.State,
 		County: stored.County, Town: stored.Town, Neighbourhood: stored.Neighbourhood, Street: stored.Street,
-		PointOfInterest: stored.PointOfInterest, Water: stored.Water, Island: stored.Island, FullAddress: stored.Address,
+		PointOfInterest: stored.PointOfInterest, Road: stored.Road, Water: stored.Water, Island: stored.Island, FullAddress: stored.Address,
 		Regions: stored.Regions}
 }
 
@@ -299,17 +301,6 @@ func (x *Index) kmFromHome(p photo) (float64, bool) {
 func (x *Index) isAway(p photo) bool {
 	n, ok := x.nearestKnown(p, sleepingKinds...)
 	return ok && n.km > AwayKm
-}
-
-// Photos are the located photos of the given local days, oldest first.
-func (x *Index) Photos(within Range) []*wherewasiv1.LocatedPhoto {
-	var out []*wherewasiv1.LocatedPhoto
-	for _, p := range x.photos {
-		if within.Contains(p.day()) {
-			out = append(out, p.proto)
-		}
-	}
-	return out
 }
 
 func appendNew(list []string, value string) []string {

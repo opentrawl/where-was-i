@@ -280,6 +280,104 @@ func (NightSource) EnumDescriptor() ([]byte, []int) {
 	return file_wherewasi_v1_where_was_i_proto_rawDescGZIP(), []int{4}
 }
 
+type DayPlaceKind int32
+
+const (
+	DayPlaceKind_DAY_PLACE_KIND_UNSPECIFIED DayPlaceKind = 0
+	DayPlaceKind_DAY_PLACE_KIND_TOWN        DayPlaceKind = 1
+	DayPlaceKind_DAY_PLACE_KIND_AREA        DayPlaceKind = 2 // a point of interest you moved through: its photos that day are more than
+)
+
+// Enum value maps for DayPlaceKind.
+var (
+	DayPlaceKind_name = map[int32]string{
+		0: "DAY_PLACE_KIND_UNSPECIFIED",
+		1: "DAY_PLACE_KIND_TOWN",
+		2: "DAY_PLACE_KIND_AREA",
+	}
+	DayPlaceKind_value = map[string]int32{
+		"DAY_PLACE_KIND_UNSPECIFIED": 0,
+		"DAY_PLACE_KIND_TOWN":        1,
+		"DAY_PLACE_KIND_AREA":        2,
+	}
+)
+
+func (x DayPlaceKind) Enum() *DayPlaceKind {
+	p := new(DayPlaceKind)
+	*p = x
+	return p
+}
+
+func (x DayPlaceKind) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (DayPlaceKind) Descriptor() protoreflect.EnumDescriptor {
+	return file_wherewasi_v1_where_was_i_proto_enumTypes[5].Descriptor()
+}
+
+func (DayPlaceKind) Type() protoreflect.EnumType {
+	return &file_wherewasi_v1_where_was_i_proto_enumTypes[5]
+}
+
+func (x DayPlaceKind) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use DayPlaceKind.Descriptor instead.
+func (DayPlaceKind) EnumDescriptor() ([]byte, []int) {
+	return file_wherewasi_v1_where_was_i_proto_rawDescGZIP(), []int{5}
+}
+
+type SpotKind int32
+
+const (
+	SpotKind_SPOT_KIND_UNSPECIFIED       SpotKind = 0
+	SpotKind_SPOT_KIND_POINT_OF_INTEREST SpotKind = 1 // a landmark, museum, venue or viewpoint Apple named
+	SpotKind_SPOT_KIND_ROAD              SpotKind = 2 // a street, road or trail Apple named, which in a park is often a trail
+)
+
+// Enum value maps for SpotKind.
+var (
+	SpotKind_name = map[int32]string{
+		0: "SPOT_KIND_UNSPECIFIED",
+		1: "SPOT_KIND_POINT_OF_INTEREST",
+		2: "SPOT_KIND_ROAD",
+	}
+	SpotKind_value = map[string]int32{
+		"SPOT_KIND_UNSPECIFIED":       0,
+		"SPOT_KIND_POINT_OF_INTEREST": 1,
+		"SPOT_KIND_ROAD":              2,
+	}
+)
+
+func (x SpotKind) Enum() *SpotKind {
+	p := new(SpotKind)
+	*p = x
+	return p
+}
+
+func (x SpotKind) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (SpotKind) Descriptor() protoreflect.EnumDescriptor {
+	return file_wherewasi_v1_where_was_i_proto_enumTypes[6].Descriptor()
+}
+
+func (SpotKind) Type() protoreflect.EnumType {
+	return &file_wherewasi_v1_where_was_i_proto_enumTypes[6]
+}
+
+func (x SpotKind) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use SpotKind.Descriptor instead.
+func (SpotKind) EnumDescriptor() ([]byte, []int) {
+	return file_wherewasi_v1_where_was_i_proto_rawDescGZIP(), []int{6}
+}
+
 type CalendarDate struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Year          int32                  `protobuf:"varint,1,opt,name=year,proto3" json:"year,omitempty"`
@@ -676,6 +774,7 @@ type Place struct {
 	Island          string                 `protobuf:"bytes,10,opt,name=island,proto3" json:"island,omitempty"`
 	FullAddress     string                 `protobuf:"bytes,11,opt,name=full_address,json=fullAddress,proto3" json:"full_address,omitempty"` // Apple's address string, unchanged
 	Regions         []string               `protobuf:"bytes,12,rep,name=regions,proto3" json:"regions,omitempty"`                            // every wider area Apple named, smallest first: "Highlands", "Kansai", "Home Counties"
+	Road            string                 `protobuf:"bytes,13,opt,name=road,proto3" json:"road,omitempty"`                                  // the street, road or trail Apple named, without a house number
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -794,6 +893,13 @@ func (x *Place) GetRegions() []string {
 	return nil
 }
 
+func (x *Place) GetRoad() string {
+	if x != nil {
+		return x.Road
+	}
+	return ""
+}
+
 // One located photo.
 type LocatedPhoto struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -874,18 +980,19 @@ func (x *LocatedPhoto) GetPhotoUuid() string {
 // A stretch of consecutive photos in one town and neighbourhood, and at the same known place or none, within one
 // local day.
 type Visit struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	Start            *LocalTime             `protobuf:"bytes,1,opt,name=start,proto3" json:"start,omitempty"`
-	End              *LocalTime             `protobuf:"bytes,2,opt,name=end,proto3" json:"end,omitempty"`
-	Place            *Place                 `protobuf:"bytes,3,opt,name=place,proto3" json:"place,omitempty"` // town level
-	Neighbourhoods   []string               `protobuf:"bytes,4,rep,name=neighbourhoods,proto3" json:"neighbourhoods,omitempty"`
-	PointsOfInterest []string               `protobuf:"bytes,5,rep,name=points_of_interest,json=pointsOfInterest,proto3" json:"points_of_interest,omitempty"`
-	KnownPlace       string                 `protobuf:"bytes,6,opt,name=known_place,json=knownPlace,proto3" json:"known_place,omitempty"` // label of the known place it was at, if any
-	KmFromHome       *float64               `protobuf:"fixed64,7,opt,name=km_from_home,json=kmFromHome,proto3,oneof" json:"km_from_home,omitempty"`
-	PhotoCount       int32                  `protobuf:"varint,8,opt,name=photo_count,json=photoCount,proto3" json:"photo_count,omitempty"`
-	KnownPlaceKind   KnownPlaceKind         `protobuf:"varint,9,opt,name=known_place_kind,json=knownPlaceKind,proto3,enum=wherewasi.v1.KnownPlaceKind" json:"known_place_kind,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Start          *LocalTime             `protobuf:"bytes,1,opt,name=start,proto3" json:"start,omitempty"`
+	End            *LocalTime             `protobuf:"bytes,2,opt,name=end,proto3" json:"end,omitempty"`
+	Place          *Place                 `protobuf:"bytes,3,opt,name=place,proto3" json:"place,omitempty"` // town level
+	Neighbourhoods []string               `protobuf:"bytes,4,rep,name=neighbourhoods,proto3" json:"neighbourhoods,omitempty"`
+	KnownPlace     string                 `protobuf:"bytes,6,opt,name=known_place,json=knownPlace,proto3" json:"known_place,omitempty"` // label of the known place it was at, if any
+	KmFromHome     *float64               `protobuf:"fixed64,7,opt,name=km_from_home,json=kmFromHome,proto3,oneof" json:"km_from_home,omitempty"`
+	PhotoCount     int32                  `protobuf:"varint,8,opt,name=photo_count,json=photoCount,proto3" json:"photo_count,omitempty"`
+	KnownPlaceKind KnownPlaceKind         `protobuf:"varint,9,opt,name=known_place_kind,json=knownPlaceKind,proto3,enum=wherewasi.v1.KnownPlaceKind" json:"known_place_kind,omitempty"`
+	PlaceName      string                 `protobuf:"bytes,10,opt,name=place_name,json=placeName,proto3" json:"place_name,omitempty"` // the town, or the area you moved through, as in ItineraryDay
+	Spots          []*Spot                `protobuf:"bytes,11,rep,name=spots,proto3" json:"spots,omitempty"`                          // where you stopped in this stretch, in time order
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *Visit) Reset() {
@@ -946,13 +1053,6 @@ func (x *Visit) GetNeighbourhoods() []string {
 	return nil
 }
 
-func (x *Visit) GetPointsOfInterest() []string {
-	if x != nil {
-		return x.PointsOfInterest
-	}
-	return nil
-}
-
 func (x *Visit) GetKnownPlace() string {
 	if x != nil {
 		return x.KnownPlace
@@ -981,6 +1081,20 @@ func (x *Visit) GetKnownPlaceKind() KnownPlaceKind {
 	return KnownPlaceKind_KNOWN_PLACE_KIND_UNSPECIFIED
 }
 
+func (x *Visit) GetPlaceName() string {
+	if x != nil {
+		return x.PlaceName
+	}
+	return ""
+}
+
+func (x *Visit) GetSpots() []*Spot {
+	if x != nil {
+		return x.Spots
+	}
+	return nil
+}
+
 // Where you spent the night after a local day, as far as photos show. The evening's last photo and the next day's
 // first photo are both kept; the night's place is the one the rule below picked.
 type Night struct {
@@ -995,8 +1109,13 @@ type Night struct {
 	LastEveningPlace *Place                 `protobuf:"bytes,6,opt,name=last_evening_place,json=lastEveningPlace,proto3" json:"last_evening_place,omitempty"` // town level, where the evening's last photo was taken
 	NextMorningPlace *Place                 `protobuf:"bytes,7,opt,name=next_morning_place,json=nextMorningPlace,proto3" json:"next_morning_place,omitempty"` // town level, where the next day's first photo was taken; unset when there is none
 	Travelling       bool                   `protobuf:"varint,10,opt,name=travelling,proto3" json:"travelling,omitempty"`                                     // the evening's and next morning's photos are far apart: an overnight flight, train
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	// or drive. Such a night is not a stop and adds no country to a trip.
+	PointOfInterest            string     `protobuf:"bytes,11,opt,name=point_of_interest,json=pointOfInterest,proto3" json:"point_of_interest,omitempty"` // Apple's point of interest for the photo that placed the night, if any
+	LastEveningTime            *LocalTime `protobuf:"bytes,12,opt,name=last_evening_time,json=lastEveningTime,proto3" json:"last_evening_time,omitempty"`
+	NextMorningTime            *LocalTime `protobuf:"bytes,13,opt,name=next_morning_time,json=nextMorningTime,proto3" json:"next_morning_time,omitempty"` // unset when there is no photo the next day
+	KmBetweenEveningAndMorning *float64   `protobuf:"fixed64,14,opt,name=km_between_evening_and_morning,json=kmBetweenEveningAndMorning,proto3,oneof" json:"km_between_evening_and_morning,omitempty"`
+	unknownFields              protoimpl.UnknownFields
+	sizeCache                  protoimpl.SizeCache
 }
 
 func (x *Night) Reset() {
@@ -1099,6 +1218,34 @@ func (x *Night) GetTravelling() bool {
 	return false
 }
 
+func (x *Night) GetPointOfInterest() string {
+	if x != nil {
+		return x.PointOfInterest
+	}
+	return ""
+}
+
+func (x *Night) GetLastEveningTime() *LocalTime {
+	if x != nil {
+		return x.LastEveningTime
+	}
+	return nil
+}
+
+func (x *Night) GetNextMorningTime() *LocalTime {
+	if x != nil {
+		return x.NextMorningTime
+	}
+	return nil
+}
+
+func (x *Night) GetKmBetweenEveningAndMorning() float64 {
+	if x != nil && x.KmBetweenEveningAndMorning != nil {
+		return *x.KmBetweenEveningAndMorning
+	}
+	return 0
+}
+
 // Consecutive nights in one town.
 type Stop struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
@@ -1194,6 +1341,59 @@ func (x *Stop) GetNoPhotos() bool {
 
 // Nights away in a row, from the day you left to the day you got back. Up to a set number of nights without photos
 // may sit inside a trip. Naming trips is left to whoever reads them; Apple's own titles are passed through.
+// A name Apple gave where some of your photos were taken, and how many photos have it.
+type NamedPlace struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	PhotoCount    int32                  `protobuf:"varint,2,opt,name=photo_count,json=photoCount,proto3" json:"photo_count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *NamedPlace) Reset() {
+	*x = NamedPlace{}
+	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NamedPlace) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NamedPlace) ProtoMessage() {}
+
+func (x *NamedPlace) ProtoReflect() protoreflect.Message {
+	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NamedPlace.ProtoReflect.Descriptor instead.
+func (*NamedPlace) Descriptor() ([]byte, []int) {
+	return file_wherewasi_v1_where_was_i_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *NamedPlace) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *NamedPlace) GetPhotoCount() int32 {
+	if x != nil {
+		return x.PhotoCount
+	}
+	return 0
+}
+
 type Trip struct {
 	state               protoimpl.MessageState `protogen:"open.v1"`
 	Link                string                 `protobuf:"bytes,1,opt,name=link,proto3" json:"link,omitempty"` // "trip:2024-05-03", the day you left
@@ -1203,17 +1403,20 @@ type Trip struct {
 	NightsWithoutPhotos int32                  `protobuf:"varint,5,opt,name=nights_without_photos,json=nightsWithoutPhotos,proto3" json:"nights_without_photos,omitempty"`
 	Countries           []string               `protobuf:"bytes,6,rep,name=countries,proto3" json:"countries,omitempty"` // countries of the stops, in order: where nights were spent, not fly-overs or
 	// overnight travel
-	Stops                    []*Stop  `protobuf:"bytes,7,rep,name=stops,proto3" json:"stops,omitempty"`
-	PhotoCount               int32    `protobuf:"varint,8,opt,name=photo_count,json=photoCount,proto3" json:"photo_count,omitempty"`
-	AppleTripTitles          []string `protobuf:"bytes,9,rep,name=apple_trip_titles,json=appleTripTitles,proto3" json:"apple_trip_titles,omitempty"`
-	NightsConfirmedByMorning int32    `protobuf:"varint,10,opt,name=nights_confirmed_by_morning,json=nightsConfirmedByMorning,proto3" json:"nights_confirmed_by_morning,omitempty"` // nights where the next morning's first photo was taken away from home
-	unknownFields            protoimpl.UnknownFields
-	sizeCache                protoimpl.SizeCache
+	Stops                    []*Stop       `protobuf:"bytes,7,rep,name=stops,proto3" json:"stops,omitempty"`
+	PhotoCount               int32         `protobuf:"varint,8,opt,name=photo_count,json=photoCount,proto3" json:"photo_count,omitempty"`
+	AppleTripTitles          []string      `protobuf:"bytes,9,rep,name=apple_trip_titles,json=appleTripTitles,proto3" json:"apple_trip_titles,omitempty"`
+	NightsConfirmedByMorning int32         `protobuf:"varint,10,opt,name=nights_confirmed_by_morning,json=nightsConfirmedByMorning,proto3" json:"nights_confirmed_by_morning,omitempty"` // nights where the next morning's first photo was taken away from home
+	PlacesInOrder            []*NamedPlace `protobuf:"bytes,11,rep,name=places_in_order,json=placesInOrder,proto3" json:"places_in_order,omitempty"`                                     // every place a day of the trip went to, in the order first seen, with how
+	// many photos it has on those days
+	Route         []string `protobuf:"bytes,12,rep,name=route,proto3" json:"route,omitempty"` // the ten of those with most photos, in the order you went
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Trip) Reset() {
 	*x = Trip{}
-	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[11]
+	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1225,7 +1428,7 @@ func (x *Trip) String() string {
 func (*Trip) ProtoMessage() {}
 
 func (x *Trip) ProtoReflect() protoreflect.Message {
-	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[11]
+	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1238,7 +1441,7 @@ func (x *Trip) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Trip.ProtoReflect.Descriptor instead.
 func (*Trip) Descriptor() ([]byte, []int) {
-	return file_wherewasi_v1_where_was_i_proto_rawDescGZIP(), []int{11}
+	return file_wherewasi_v1_where_was_i_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *Trip) GetLink() string {
@@ -1311,22 +1514,35 @@ func (x *Trip) GetNightsConfirmedByMorning() int32 {
 	return 0
 }
 
+func (x *Trip) GetPlacesInOrder() []*NamedPlace {
+	if x != nil {
+		return x.PlacesInOrder
+	}
+	return nil
+}
+
+func (x *Trip) GetRoute() []string {
+	if x != nil {
+		return x.Route
+	}
+	return nil
+}
+
 // One day of a trip.
 type ItineraryDay struct {
 	state                 protoimpl.MessageState `protogen:"open.v1"`
 	LocalDay              *CalendarDate          `protobuf:"bytes,1,opt,name=local_day,json=localDay,proto3" json:"local_day,omitempty"`
-	TownsInOrder          []*Place               `protobuf:"bytes,2,rep,name=towns_in_order,json=townsInOrder,proto3" json:"towns_in_order,omitempty"` // town level, in time order; consecutive repeats merged
-	PointsOfInterest      []string               `protobuf:"bytes,3,rep,name=points_of_interest,json=pointsOfInterest,proto3" json:"points_of_interest,omitempty"`
 	Night                 *Night                 `protobuf:"bytes,4,opt,name=night,proto3" json:"night,omitempty"` // unset on the day you got back, and on nights without photos
 	PhotoCount            int32                  `protobuf:"varint,5,opt,name=photo_count,json=photoCount,proto3" json:"photo_count,omitempty"`
 	UtcOffsetsSeenSeconds []int32                `protobuf:"varint,6,rep,packed,name=utc_offsets_seen_seconds,json=utcOffsetsSeenSeconds,proto3" json:"utc_offsets_seen_seconds,omitempty"`
+	Places                []*DayPlace            `protobuf:"bytes,7,rep,name=places,proto3" json:"places,omitempty"` // where the day's photos were taken, in the order first seen
 	unknownFields         protoimpl.UnknownFields
 	sizeCache             protoimpl.SizeCache
 }
 
 func (x *ItineraryDay) Reset() {
 	*x = ItineraryDay{}
-	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[12]
+	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1338,7 +1554,7 @@ func (x *ItineraryDay) String() string {
 func (*ItineraryDay) ProtoMessage() {}
 
 func (x *ItineraryDay) ProtoReflect() protoreflect.Message {
-	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[12]
+	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1351,26 +1567,12 @@ func (x *ItineraryDay) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ItineraryDay.ProtoReflect.Descriptor instead.
 func (*ItineraryDay) Descriptor() ([]byte, []int) {
-	return file_wherewasi_v1_where_was_i_proto_rawDescGZIP(), []int{12}
+	return file_wherewasi_v1_where_was_i_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *ItineraryDay) GetLocalDay() *CalendarDate {
 	if x != nil {
 		return x.LocalDay
-	}
-	return nil
-}
-
-func (x *ItineraryDay) GetTownsInOrder() []*Place {
-	if x != nil {
-		return x.TownsInOrder
-	}
-	return nil
-}
-
-func (x *ItineraryDay) GetPointsOfInterest() []string {
-	if x != nil {
-		return x.PointsOfInterest
 	}
 	return nil
 }
@@ -1396,6 +1598,176 @@ func (x *ItineraryDay) GetUtcOffsetsSeenSeconds() []int32 {
 	return nil
 }
 
+func (x *ItineraryDay) GetPlaces() []*DayPlace {
+	if x != nil {
+		return x.Places
+	}
+	return nil
+}
+
+// A town, or an area you moved through, and what you did in it that day.
+type DayPlace struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Name           string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Kind           DayPlaceKind           `protobuf:"varint,2,opt,name=kind,proto3,enum=wherewasi.v1.DayPlaceKind" json:"kind,omitempty"`
+	PhotoCount     int32                  `protobuf:"varint,3,opt,name=photo_count,json=photoCount,proto3" json:"photo_count,omitempty"`
+	WentTo         bool                   `protobuf:"varint,4,opt,name=went_to,json=wentTo,proto3" json:"went_to,omitempty"`  // it holds a quarter or more of the day's photos
+	Spots          []*Spot                `protobuf:"bytes,5,rep,name=spots,proto3" json:"spots,omitempty"`                   // where you stopped in it, most photos first
+	Neighbourhoods []*NamedPlace          `protobuf:"bytes,6,rep,name=neighbourhoods,proto3" json:"neighbourhoods,omitempty"` // Apple's neighbourhoods in it, most photos first
+	Region         *Place                 `protobuf:"bytes,7,opt,name=region,proto3" json:"region,omitempty"`                 // the country, state and county of its first photo
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *DayPlace) Reset() {
+	*x = DayPlace{}
+	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DayPlace) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DayPlace) ProtoMessage() {}
+
+func (x *DayPlace) ProtoReflect() protoreflect.Message {
+	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DayPlace.ProtoReflect.Descriptor instead.
+func (*DayPlace) Descriptor() ([]byte, []int) {
+	return file_wherewasi_v1_where_was_i_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *DayPlace) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *DayPlace) GetKind() DayPlaceKind {
+	if x != nil {
+		return x.Kind
+	}
+	return DayPlaceKind_DAY_PLACE_KIND_UNSPECIFIED
+}
+
+func (x *DayPlace) GetPhotoCount() int32 {
+	if x != nil {
+		return x.PhotoCount
+	}
+	return 0
+}
+
+func (x *DayPlace) GetWentTo() bool {
+	if x != nil {
+		return x.WentTo
+	}
+	return false
+}
+
+func (x *DayPlace) GetSpots() []*Spot {
+	if x != nil {
+		return x.Spots
+	}
+	return nil
+}
+
+func (x *DayPlace) GetNeighbourhoods() []*NamedPlace {
+	if x != nil {
+		return x.Neighbourhoods
+	}
+	return nil
+}
+
+func (x *DayPlace) GetRegion() *Place {
+	if x != nil {
+		return x.Region
+	}
+	return nil
+}
+
+// Somewhere you stopped: a road or point of interest whose photos that day are within 2 km of each other. A road you
+// drove along, or a park you moved through, is not a spot.
+type Spot struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Kind          SpotKind               `protobuf:"varint,2,opt,name=kind,proto3,enum=wherewasi.v1.SpotKind" json:"kind,omitempty"`
+	PhotoCount    int32                  `protobuf:"varint,3,opt,name=photo_count,json=photoCount,proto3" json:"photo_count,omitempty"`
+	Neighbourhood string                 `protobuf:"bytes,4,opt,name=neighbourhood,proto3" json:"neighbourhood,omitempty"` // Apple's neighbourhood for its first photo, if any
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Spot) Reset() {
+	*x = Spot{}
+	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Spot) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Spot) ProtoMessage() {}
+
+func (x *Spot) ProtoReflect() protoreflect.Message {
+	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Spot.ProtoReflect.Descriptor instead.
+func (*Spot) Descriptor() ([]byte, []int) {
+	return file_wherewasi_v1_where_was_i_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *Spot) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *Spot) GetKind() SpotKind {
+	if x != nil {
+		return x.Kind
+	}
+	return SpotKind_SPOT_KIND_UNSPECIFIED
+}
+
+func (x *Spot) GetPhotoCount() int32 {
+	if x != nil {
+		return x.PhotoCount
+	}
+	return 0
+}
+
+func (x *Spot) GetNeighbourhood() string {
+	if x != nil {
+		return x.Neighbourhood
+	}
+	return ""
+}
+
 type Itinerary struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Trip          *Trip                  `protobuf:"bytes,1,opt,name=trip,proto3" json:"trip,omitempty"`
@@ -1406,7 +1778,7 @@ type Itinerary struct {
 
 func (x *Itinerary) Reset() {
 	*x = Itinerary{}
-	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[13]
+	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1418,7 +1790,7 @@ func (x *Itinerary) String() string {
 func (*Itinerary) ProtoMessage() {}
 
 func (x *Itinerary) ProtoReflect() protoreflect.Message {
-	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[13]
+	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1431,7 +1803,7 @@ func (x *Itinerary) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Itinerary.ProtoReflect.Descriptor instead.
 func (*Itinerary) Descriptor() ([]byte, []int) {
-	return file_wherewasi_v1_where_was_i_proto_rawDescGZIP(), []int{13}
+	return file_wherewasi_v1_where_was_i_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *Itinerary) GetTrip() *Trip {
@@ -1463,7 +1835,7 @@ type DayTimeline struct {
 
 func (x *DayTimeline) Reset() {
 	*x = DayTimeline{}
-	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[14]
+	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1475,7 +1847,7 @@ func (x *DayTimeline) String() string {
 func (*DayTimeline) ProtoMessage() {}
 
 func (x *DayTimeline) ProtoReflect() protoreflect.Message {
-	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[14]
+	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1488,7 +1860,7 @@ func (x *DayTimeline) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DayTimeline.ProtoReflect.Descriptor instead.
 func (*DayTimeline) Descriptor() ([]byte, []int) {
-	return file_wherewasi_v1_where_was_i_proto_rawDescGZIP(), []int{14}
+	return file_wherewasi_v1_where_was_i_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *DayTimeline) GetLocalDay() *CalendarDate {
@@ -1551,7 +1923,7 @@ type PlaceStay struct {
 
 func (x *PlaceStay) Reset() {
 	*x = PlaceStay{}
-	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[15]
+	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1563,7 +1935,7 @@ func (x *PlaceStay) String() string {
 func (*PlaceStay) ProtoMessage() {}
 
 func (x *PlaceStay) ProtoReflect() protoreflect.Message {
-	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[15]
+	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1576,7 +1948,7 @@ func (x *PlaceStay) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PlaceStay.ProtoReflect.Descriptor instead.
 func (*PlaceStay) Descriptor() ([]byte, []int) {
-	return file_wherewasi_v1_where_was_i_proto_rawDescGZIP(), []int{15}
+	return file_wherewasi_v1_where_was_i_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *PlaceStay) GetFirstDay() *CalendarDate {
@@ -1647,7 +2019,7 @@ type PlaceDays struct {
 
 func (x *PlaceDays) Reset() {
 	*x = PlaceDays{}
-	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[16]
+	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1659,7 +2031,7 @@ func (x *PlaceDays) String() string {
 func (*PlaceDays) ProtoMessage() {}
 
 func (x *PlaceDays) ProtoReflect() protoreflect.Message {
-	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[16]
+	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1672,7 +2044,7 @@ func (x *PlaceDays) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PlaceDays.ProtoReflect.Descriptor instead.
 func (*PlaceDays) Descriptor() ([]byte, []int) {
-	return file_wherewasi_v1_where_was_i_proto_rawDescGZIP(), []int{16}
+	return file_wherewasi_v1_where_was_i_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *PlaceDays) GetPlaceAskedFor() string {
@@ -1713,7 +2085,7 @@ type CountryNights struct {
 
 func (x *CountryNights) Reset() {
 	*x = CountryNights{}
-	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[17]
+	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1725,7 +2097,7 @@ func (x *CountryNights) String() string {
 func (*CountryNights) ProtoMessage() {}
 
 func (x *CountryNights) ProtoReflect() protoreflect.Message {
-	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[17]
+	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1738,7 +2110,7 @@ func (x *CountryNights) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CountryNights.ProtoReflect.Descriptor instead.
 func (*CountryNights) Descriptor() ([]byte, []int) {
-	return file_wherewasi_v1_where_was_i_proto_rawDescGZIP(), []int{17}
+	return file_wherewasi_v1_where_was_i_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *CountryNights) GetCountry() string {
@@ -1772,7 +2144,7 @@ type Year struct {
 
 func (x *Year) Reset() {
 	*x = Year{}
-	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[18]
+	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1784,7 +2156,7 @@ func (x *Year) String() string {
 func (*Year) ProtoMessage() {}
 
 func (x *Year) ProtoReflect() protoreflect.Message {
-	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[18]
+	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1797,7 +2169,7 @@ func (x *Year) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Year.ProtoReflect.Descriptor instead.
 func (*Year) Descriptor() ([]byte, []int) {
-	return file_wherewasi_v1_where_was_i_proto_rawDescGZIP(), []int{18}
+	return file_wherewasi_v1_where_was_i_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *Year) GetYear() int32 {
@@ -1865,7 +2237,7 @@ type Years struct {
 
 func (x *Years) Reset() {
 	*x = Years{}
-	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[19]
+	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1877,7 +2249,7 @@ func (x *Years) String() string {
 func (*Years) ProtoMessage() {}
 
 func (x *Years) ProtoReflect() protoreflect.Message {
-	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[19]
+	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1890,7 +2262,7 @@ func (x *Years) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Years.ProtoReflect.Descriptor instead.
 func (*Years) Descriptor() ([]byte, []int) {
-	return file_wherewasi_v1_where_was_i_proto_rawDescGZIP(), []int{19}
+	return file_wherewasi_v1_where_was_i_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *Years) GetYears() []*Year {
@@ -1914,7 +2286,7 @@ type Overview struct {
 
 func (x *Overview) Reset() {
 	*x = Overview{}
-	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[20]
+	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1926,7 +2298,7 @@ func (x *Overview) String() string {
 func (*Overview) ProtoMessage() {}
 
 func (x *Overview) ProtoReflect() protoreflect.Message {
-	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[20]
+	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1939,7 +2311,7 @@ func (x *Overview) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Overview.ProtoReflect.Descriptor instead.
 func (*Overview) Descriptor() ([]byte, []int) {
-	return file_wherewasi_v1_where_was_i_proto_rawDescGZIP(), []int{20}
+	return file_wherewasi_v1_where_was_i_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *Overview) GetLocatedPhotos() int32 {
@@ -1995,7 +2367,7 @@ type Trips struct {
 
 func (x *Trips) Reset() {
 	*x = Trips{}
-	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[21]
+	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2007,7 +2379,7 @@ func (x *Trips) String() string {
 func (*Trips) ProtoMessage() {}
 
 func (x *Trips) ProtoReflect() protoreflect.Message {
-	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[21]
+	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2020,7 +2392,7 @@ func (x *Trips) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Trips.ProtoReflect.Descriptor instead.
 func (*Trips) Descriptor() ([]byte, []int) {
-	return file_wherewasi_v1_where_was_i_proto_rawDescGZIP(), []int{21}
+	return file_wherewasi_v1_where_was_i_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *Trips) GetTrips() []*Trip {
@@ -2054,7 +2426,7 @@ type Days struct {
 
 func (x *Days) Reset() {
 	*x = Days{}
-	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[22]
+	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2066,7 +2438,7 @@ func (x *Days) String() string {
 func (*Days) ProtoMessage() {}
 
 func (x *Days) ProtoReflect() protoreflect.Message {
-	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[22]
+	mi := &file_wherewasi_v1_where_was_i_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2079,7 +2451,7 @@ func (x *Days) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Days.ProtoReflect.Descriptor instead.
 func (*Days) Descriptor() ([]byte, []int) {
-	return file_wherewasi_v1_where_was_i_proto_rawDescGZIP(), []int{22}
+	return file_wherewasi_v1_where_was_i_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *Days) GetDays() []*ItineraryDay {
@@ -2129,7 +2501,7 @@ const file_wherewasi_v1_where_was_i_proto_rawDesc = "" +
 	"\bevidence\x18\x06 \x01(\tR\bevidence\x126\n" +
 	"\x06source\x18\a \x01(\x0e2\x1e.wherewasi.v1.KnownPlaceSourceR\x06source\"?\n" +
 	"\vKnownPlaces\x120\n" +
-	"\x06places\x18\x01 \x03(\v2\x18.wherewasi.v1.KnownPlaceR\x06places\"\xdb\x02\n" +
+	"\x06places\x18\x01 \x03(\v2\x18.wherewasi.v1.KnownPlaceR\x06places\"\xef\x02\n" +
 	"\x05Place\x12!\n" +
 	"\fcountry_code\x18\x01 \x01(\tR\vcountryCode\x12\x18\n" +
 	"\acountry\x18\x02 \x01(\tR\acountry\x12\x14\n" +
@@ -2143,28 +2515,32 @@ const file_wherewasi_v1_where_was_i_proto_rawDesc = "" +
 	"\x06island\x18\n" +
 	" \x01(\tR\x06island\x12!\n" +
 	"\ffull_address\x18\v \x01(\tR\vfullAddress\x12\x18\n" +
-	"\aregions\x18\f \x03(\tR\aregions\"\xf8\x01\n" +
+	"\aregions\x18\f \x03(\tR\aregions\x12\x12\n" +
+	"\x04road\x18\r \x01(\tR\x04road\"\xf8\x01\n" +
 	"\fLocatedPhoto\x12+\n" +
 	"\x04time\x18\x01 \x01(\v2\x17.wherewasi.v1.LocalTimeR\x04time\x12?\n" +
 	"\rdevice_offset\x18\x02 \x01(\v2\x1a.wherewasi.v1.DeviceOffsetR\fdeviceOffset\x120\n" +
 	"\blocation\x18\x03 \x01(\v2\x14.wherewasi.v1.LatLngR\blocation\x12)\n" +
 	"\x05place\x18\x04 \x01(\v2\x13.wherewasi.v1.PlaceR\x05place\x12\x1d\n" +
 	"\n" +
-	"photo_uuid\x18\x05 \x01(\tR\tphotoUuid\"\xa4\x03\n" +
+	"photo_uuid\x18\x05 \x01(\tR\tphotoUuid\"\xc5\x03\n" +
 	"\x05Visit\x12-\n" +
 	"\x05start\x18\x01 \x01(\v2\x17.wherewasi.v1.LocalTimeR\x05start\x12)\n" +
 	"\x03end\x18\x02 \x01(\v2\x17.wherewasi.v1.LocalTimeR\x03end\x12)\n" +
 	"\x05place\x18\x03 \x01(\v2\x13.wherewasi.v1.PlaceR\x05place\x12&\n" +
-	"\x0eneighbourhoods\x18\x04 \x03(\tR\x0eneighbourhoods\x12,\n" +
-	"\x12points_of_interest\x18\x05 \x03(\tR\x10pointsOfInterest\x12\x1f\n" +
+	"\x0eneighbourhoods\x18\x04 \x03(\tR\x0eneighbourhoods\x12\x1f\n" +
 	"\vknown_place\x18\x06 \x01(\tR\n" +
 	"knownPlace\x12%\n" +
 	"\fkm_from_home\x18\a \x01(\x01H\x00R\n" +
 	"kmFromHome\x88\x01\x01\x12\x1f\n" +
 	"\vphoto_count\x18\b \x01(\x05R\n" +
 	"photoCount\x12F\n" +
-	"\x10known_place_kind\x18\t \x01(\x0e2\x1c.wherewasi.v1.KnownPlaceKindR\x0eknownPlaceKindB\x0f\n" +
-	"\r_km_from_home\"\xdd\x03\n" +
+	"\x10known_place_kind\x18\t \x01(\x0e2\x1c.wherewasi.v1.KnownPlaceKindR\x0eknownPlaceKind\x12\x1d\n" +
+	"\n" +
+	"place_name\x18\n" +
+	" \x01(\tR\tplaceName\x12(\n" +
+	"\x05spots\x18\v \x03(\v2\x12.wherewasi.v1.SpotR\x05spotsB\x0f\n" +
+	"\r_km_from_homeJ\x04\b\x05\x10\x06\"\xff\x05\n" +
 	"\x05Night\x124\n" +
 	"\aevening\x18\x01 \x01(\v2\x1a.wherewasi.v1.CalendarDateR\aevening\x12)\n" +
 	"\x05place\x18\x02 \x01(\v2\x13.wherewasi.v1.PlaceR\x05place\x12\x1f\n" +
@@ -2180,7 +2556,12 @@ const file_wherewasi_v1_where_was_i_proto_rawDesc = "" +
 	"\n" +
 	"travelling\x18\n" +
 	" \x01(\bR\n" +
-	"travelling\"\xb0\x02\n" +
+	"travelling\x12*\n" +
+	"\x11point_of_interest\x18\v \x01(\tR\x0fpointOfInterest\x12C\n" +
+	"\x11last_evening_time\x18\f \x01(\v2\x17.wherewasi.v1.LocalTimeR\x0flastEveningTime\x12C\n" +
+	"\x11next_morning_time\x18\r \x01(\v2\x17.wherewasi.v1.LocalTimeR\x0fnextMorningTime\x12G\n" +
+	"\x1ekm_between_evening_and_morning\x18\x0e \x01(\x01H\x00R\x1akmBetweenEveningAndMorning\x88\x01\x01B!\n" +
+	"\x1f_km_between_evening_and_morning\"\xb0\x02\n" +
 	"\x04Stop\x12)\n" +
 	"\x05place\x18\x01 \x01(\v2\x13.wherewasi.v1.PlaceR\x05place\x12\x1f\n" +
 	"\vknown_place\x18\x02 \x01(\tR\n" +
@@ -2191,7 +2572,12 @@ const file_wherewasi_v1_where_was_i_proto_rawDesc = "" +
 	"\n" +
 	"travelling\x18\x06 \x01(\bR\n" +
 	"travelling\x12\x1b\n" +
-	"\tno_photos\x18\a \x01(\bR\bnoPhotos\"\x9a\x03\n" +
+	"\tno_photos\x18\a \x01(\bR\bnoPhotos\"A\n" +
+	"\n" +
+	"NamedPlace\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1f\n" +
+	"\vphoto_count\x18\x02 \x01(\x05R\n" +
+	"photoCount\"\xf2\x03\n" +
 	"\x04Trip\x12\x12\n" +
 	"\x04link\x18\x01 \x01(\tR\x04link\x12.\n" +
 	"\x04left\x18\x02 \x01(\v2\x1a.wherewasi.v1.CalendarDateR\x04left\x12.\n" +
@@ -2204,15 +2590,32 @@ const file_wherewasi_v1_where_was_i_proto_rawDesc = "" +
 	"photoCount\x12*\n" +
 	"\x11apple_trip_titles\x18\t \x03(\tR\x0fappleTripTitles\x12=\n" +
 	"\x1bnights_confirmed_by_morning\x18\n" +
-	" \x01(\x05R\x18nightsConfirmedByMorning\"\xb5\x02\n" +
+	" \x01(\x05R\x18nightsConfirmedByMorning\x12@\n" +
+	"\x0fplaces_in_order\x18\v \x03(\v2\x18.wherewasi.v1.NamedPlaceR\rplacesInOrder\x12\x14\n" +
+	"\x05route\x18\f \x03(\tR\x05route\"\x94\x02\n" +
 	"\fItineraryDay\x127\n" +
-	"\tlocal_day\x18\x01 \x01(\v2\x1a.wherewasi.v1.CalendarDateR\blocalDay\x129\n" +
-	"\x0etowns_in_order\x18\x02 \x03(\v2\x13.wherewasi.v1.PlaceR\ftownsInOrder\x12,\n" +
-	"\x12points_of_interest\x18\x03 \x03(\tR\x10pointsOfInterest\x12)\n" +
+	"\tlocal_day\x18\x01 \x01(\v2\x1a.wherewasi.v1.CalendarDateR\blocalDay\x12)\n" +
 	"\x05night\x18\x04 \x01(\v2\x13.wherewasi.v1.NightR\x05night\x12\x1f\n" +
 	"\vphoto_count\x18\x05 \x01(\x05R\n" +
 	"photoCount\x127\n" +
-	"\x18utc_offsets_seen_seconds\x18\x06 \x03(\x05R\x15utcOffsetsSeenSeconds\"c\n" +
+	"\x18utc_offsets_seen_seconds\x18\x06 \x03(\x05R\x15utcOffsetsSeenSeconds\x12.\n" +
+	"\x06places\x18\a \x03(\v2\x16.wherewasi.v1.DayPlaceR\x06placesJ\x04\b\x02\x10\x03J\x04\b\x03\x10\x04J\x04\b\b\x10\tJ\x04\b\t\x10\n" +
+	"\"\xa1\x02\n" +
+	"\bDayPlace\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12.\n" +
+	"\x04kind\x18\x02 \x01(\x0e2\x1a.wherewasi.v1.DayPlaceKindR\x04kind\x12\x1f\n" +
+	"\vphoto_count\x18\x03 \x01(\x05R\n" +
+	"photoCount\x12\x17\n" +
+	"\awent_to\x18\x04 \x01(\bR\x06wentTo\x12(\n" +
+	"\x05spots\x18\x05 \x03(\v2\x12.wherewasi.v1.SpotR\x05spots\x12@\n" +
+	"\x0eneighbourhoods\x18\x06 \x03(\v2\x18.wherewasi.v1.NamedPlaceR\x0eneighbourhoods\x12+\n" +
+	"\x06region\x18\a \x01(\v2\x13.wherewasi.v1.PlaceR\x06region\"\x8d\x01\n" +
+	"\x04Spot\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12*\n" +
+	"\x04kind\x18\x02 \x01(\x0e2\x16.wherewasi.v1.SpotKindR\x04kind\x12\x1f\n" +
+	"\vphoto_count\x18\x03 \x01(\x05R\n" +
+	"photoCount\x12$\n" +
+	"\rneighbourhood\x18\x04 \x01(\tR\rneighbourhood\"c\n" +
 	"\tItinerary\x12&\n" +
 	"\x04trip\x18\x01 \x01(\v2\x12.wherewasi.v1.TripR\x04trip\x12.\n" +
 	"\x04days\x18\x02 \x03(\v2\x1a.wherewasi.v1.ItineraryDayR\x04days\"\xb2\x02\n" +
@@ -2296,7 +2699,15 @@ const file_wherewasi_v1_where_was_i_proto_rawDesc = "" +
 	"\x18NIGHT_SOURCE_UNSPECIFIED\x10\x00\x12\x1f\n" +
 	"\x1bNIGHT_SOURCE_HOME_OR_FAMILY\x10\x01\x12\x1d\n" +
 	"\x19NIGHT_SOURCE_NEXT_MORNING\x10\x02\x12\x1d\n" +
-	"\x19NIGHT_SOURCE_LAST_EVENING\x10\x03B?Z=github.com/opentrawl/where-was-i/gen/wherewasi/v1;wherewasiv1b\x06proto3"
+	"\x19NIGHT_SOURCE_LAST_EVENING\x10\x03*`\n" +
+	"\fDayPlaceKind\x12\x1e\n" +
+	"\x1aDAY_PLACE_KIND_UNSPECIFIED\x10\x00\x12\x17\n" +
+	"\x13DAY_PLACE_KIND_TOWN\x10\x01\x12\x17\n" +
+	"\x13DAY_PLACE_KIND_AREA\x10\x02*Z\n" +
+	"\bSpotKind\x12\x19\n" +
+	"\x15SPOT_KIND_UNSPECIFIED\x10\x00\x12\x1f\n" +
+	"\x1bSPOT_KIND_POINT_OF_INTEREST\x10\x01\x12\x12\n" +
+	"\x0eSPOT_KIND_ROAD\x10\x02B?Z=github.com/opentrawl/where-was-i/gen/wherewasi/v1;wherewasiv1b\x06proto3"
 
 var (
 	file_wherewasi_v1_where_was_i_proto_rawDescOnce sync.Once
@@ -2310,95 +2721,109 @@ func file_wherewasi_v1_where_was_i_proto_rawDescGZIP() []byte {
 	return file_wherewasi_v1_where_was_i_proto_rawDescData
 }
 
-var file_wherewasi_v1_where_was_i_proto_enumTypes = make([]protoimpl.EnumInfo, 5)
-var file_wherewasi_v1_where_was_i_proto_msgTypes = make([]protoimpl.MessageInfo, 23)
+var file_wherewasi_v1_where_was_i_proto_enumTypes = make([]protoimpl.EnumInfo, 7)
+var file_wherewasi_v1_where_was_i_proto_msgTypes = make([]protoimpl.MessageInfo, 26)
 var file_wherewasi_v1_where_was_i_proto_goTypes = []any{
 	(ZoneSource)(0),               // 0: wherewasi.v1.ZoneSource
 	(DeviceOffsetSource)(0),       // 1: wherewasi.v1.DeviceOffsetSource
 	(KnownPlaceKind)(0),           // 2: wherewasi.v1.KnownPlaceKind
 	(KnownPlaceSource)(0),         // 3: wherewasi.v1.KnownPlaceSource
 	(NightSource)(0),              // 4: wherewasi.v1.NightSource
-	(*CalendarDate)(nil),          // 5: wherewasi.v1.CalendarDate
-	(*LatLng)(nil),                // 6: wherewasi.v1.LatLng
-	(*LocalTime)(nil),             // 7: wherewasi.v1.LocalTime
-	(*DeviceOffset)(nil),          // 8: wherewasi.v1.DeviceOffset
-	(*KnownPlace)(nil),            // 9: wherewasi.v1.KnownPlace
-	(*KnownPlaces)(nil),           // 10: wherewasi.v1.KnownPlaces
-	(*Place)(nil),                 // 11: wherewasi.v1.Place
-	(*LocatedPhoto)(nil),          // 12: wherewasi.v1.LocatedPhoto
-	(*Visit)(nil),                 // 13: wherewasi.v1.Visit
-	(*Night)(nil),                 // 14: wherewasi.v1.Night
-	(*Stop)(nil),                  // 15: wherewasi.v1.Stop
-	(*Trip)(nil),                  // 16: wherewasi.v1.Trip
-	(*ItineraryDay)(nil),          // 17: wherewasi.v1.ItineraryDay
-	(*Itinerary)(nil),             // 18: wherewasi.v1.Itinerary
-	(*DayTimeline)(nil),           // 19: wherewasi.v1.DayTimeline
-	(*PlaceStay)(nil),             // 20: wherewasi.v1.PlaceStay
-	(*PlaceDays)(nil),             // 21: wherewasi.v1.PlaceDays
-	(*CountryNights)(nil),         // 22: wherewasi.v1.CountryNights
-	(*Year)(nil),                  // 23: wherewasi.v1.Year
-	(*Years)(nil),                 // 24: wherewasi.v1.Years
-	(*Overview)(nil),              // 25: wherewasi.v1.Overview
-	(*Trips)(nil),                 // 26: wherewasi.v1.Trips
-	(*Days)(nil),                  // 27: wherewasi.v1.Days
-	(*timestamppb.Timestamp)(nil), // 28: google.protobuf.Timestamp
+	(DayPlaceKind)(0),             // 5: wherewasi.v1.DayPlaceKind
+	(SpotKind)(0),                 // 6: wherewasi.v1.SpotKind
+	(*CalendarDate)(nil),          // 7: wherewasi.v1.CalendarDate
+	(*LatLng)(nil),                // 8: wherewasi.v1.LatLng
+	(*LocalTime)(nil),             // 9: wherewasi.v1.LocalTime
+	(*DeviceOffset)(nil),          // 10: wherewasi.v1.DeviceOffset
+	(*KnownPlace)(nil),            // 11: wherewasi.v1.KnownPlace
+	(*KnownPlaces)(nil),           // 12: wherewasi.v1.KnownPlaces
+	(*Place)(nil),                 // 13: wherewasi.v1.Place
+	(*LocatedPhoto)(nil),          // 14: wherewasi.v1.LocatedPhoto
+	(*Visit)(nil),                 // 15: wherewasi.v1.Visit
+	(*Night)(nil),                 // 16: wherewasi.v1.Night
+	(*Stop)(nil),                  // 17: wherewasi.v1.Stop
+	(*NamedPlace)(nil),            // 18: wherewasi.v1.NamedPlace
+	(*Trip)(nil),                  // 19: wherewasi.v1.Trip
+	(*ItineraryDay)(nil),          // 20: wherewasi.v1.ItineraryDay
+	(*DayPlace)(nil),              // 21: wherewasi.v1.DayPlace
+	(*Spot)(nil),                  // 22: wherewasi.v1.Spot
+	(*Itinerary)(nil),             // 23: wherewasi.v1.Itinerary
+	(*DayTimeline)(nil),           // 24: wherewasi.v1.DayTimeline
+	(*PlaceStay)(nil),             // 25: wherewasi.v1.PlaceStay
+	(*PlaceDays)(nil),             // 26: wherewasi.v1.PlaceDays
+	(*CountryNights)(nil),         // 27: wherewasi.v1.CountryNights
+	(*Year)(nil),                  // 28: wherewasi.v1.Year
+	(*Years)(nil),                 // 29: wherewasi.v1.Years
+	(*Overview)(nil),              // 30: wherewasi.v1.Overview
+	(*Trips)(nil),                 // 31: wherewasi.v1.Trips
+	(*Days)(nil),                  // 32: wherewasi.v1.Days
+	(*timestamppb.Timestamp)(nil), // 33: google.protobuf.Timestamp
 }
 var file_wherewasi_v1_where_was_i_proto_depIdxs = []int32{
-	28, // 0: wherewasi.v1.LocalTime.utc:type_name -> google.protobuf.Timestamp
+	33, // 0: wherewasi.v1.LocalTime.utc:type_name -> google.protobuf.Timestamp
 	0,  // 1: wherewasi.v1.LocalTime.zone_source:type_name -> wherewasi.v1.ZoneSource
 	1,  // 2: wherewasi.v1.DeviceOffset.source:type_name -> wherewasi.v1.DeviceOffsetSource
 	2,  // 3: wherewasi.v1.KnownPlace.kind:type_name -> wherewasi.v1.KnownPlaceKind
-	6,  // 4: wherewasi.v1.KnownPlace.location:type_name -> wherewasi.v1.LatLng
-	5,  // 5: wherewasi.v1.KnownPlace.valid_from:type_name -> wherewasi.v1.CalendarDate
-	5,  // 6: wherewasi.v1.KnownPlace.valid_to:type_name -> wherewasi.v1.CalendarDate
+	8,  // 4: wherewasi.v1.KnownPlace.location:type_name -> wherewasi.v1.LatLng
+	7,  // 5: wherewasi.v1.KnownPlace.valid_from:type_name -> wherewasi.v1.CalendarDate
+	7,  // 6: wherewasi.v1.KnownPlace.valid_to:type_name -> wherewasi.v1.CalendarDate
 	3,  // 7: wherewasi.v1.KnownPlace.source:type_name -> wherewasi.v1.KnownPlaceSource
-	9,  // 8: wherewasi.v1.KnownPlaces.places:type_name -> wherewasi.v1.KnownPlace
-	7,  // 9: wherewasi.v1.LocatedPhoto.time:type_name -> wherewasi.v1.LocalTime
-	8,  // 10: wherewasi.v1.LocatedPhoto.device_offset:type_name -> wherewasi.v1.DeviceOffset
-	6,  // 11: wherewasi.v1.LocatedPhoto.location:type_name -> wherewasi.v1.LatLng
-	11, // 12: wherewasi.v1.LocatedPhoto.place:type_name -> wherewasi.v1.Place
-	7,  // 13: wherewasi.v1.Visit.start:type_name -> wherewasi.v1.LocalTime
-	7,  // 14: wherewasi.v1.Visit.end:type_name -> wherewasi.v1.LocalTime
-	11, // 15: wherewasi.v1.Visit.place:type_name -> wherewasi.v1.Place
+	11, // 8: wherewasi.v1.KnownPlaces.places:type_name -> wherewasi.v1.KnownPlace
+	9,  // 9: wherewasi.v1.LocatedPhoto.time:type_name -> wherewasi.v1.LocalTime
+	10, // 10: wherewasi.v1.LocatedPhoto.device_offset:type_name -> wherewasi.v1.DeviceOffset
+	8,  // 11: wherewasi.v1.LocatedPhoto.location:type_name -> wherewasi.v1.LatLng
+	13, // 12: wherewasi.v1.LocatedPhoto.place:type_name -> wherewasi.v1.Place
+	9,  // 13: wherewasi.v1.Visit.start:type_name -> wherewasi.v1.LocalTime
+	9,  // 14: wherewasi.v1.Visit.end:type_name -> wherewasi.v1.LocalTime
+	13, // 15: wherewasi.v1.Visit.place:type_name -> wherewasi.v1.Place
 	2,  // 16: wherewasi.v1.Visit.known_place_kind:type_name -> wherewasi.v1.KnownPlaceKind
-	5,  // 17: wherewasi.v1.Night.evening:type_name -> wherewasi.v1.CalendarDate
-	11, // 18: wherewasi.v1.Night.place:type_name -> wherewasi.v1.Place
-	2,  // 19: wherewasi.v1.Night.known_place_kind:type_name -> wherewasi.v1.KnownPlaceKind
-	4,  // 20: wherewasi.v1.Night.source:type_name -> wherewasi.v1.NightSource
-	11, // 21: wherewasi.v1.Night.last_evening_place:type_name -> wherewasi.v1.Place
-	11, // 22: wherewasi.v1.Night.next_morning_place:type_name -> wherewasi.v1.Place
-	11, // 23: wherewasi.v1.Stop.place:type_name -> wherewasi.v1.Place
-	2,  // 24: wherewasi.v1.Stop.known_place_kind:type_name -> wherewasi.v1.KnownPlaceKind
-	5,  // 25: wherewasi.v1.Stop.first_evening:type_name -> wherewasi.v1.CalendarDate
-	5,  // 26: wherewasi.v1.Trip.left:type_name -> wherewasi.v1.CalendarDate
-	5,  // 27: wherewasi.v1.Trip.back:type_name -> wherewasi.v1.CalendarDate
-	15, // 28: wherewasi.v1.Trip.stops:type_name -> wherewasi.v1.Stop
-	5,  // 29: wherewasi.v1.ItineraryDay.local_day:type_name -> wherewasi.v1.CalendarDate
-	11, // 30: wherewasi.v1.ItineraryDay.towns_in_order:type_name -> wherewasi.v1.Place
-	14, // 31: wherewasi.v1.ItineraryDay.night:type_name -> wherewasi.v1.Night
-	16, // 32: wherewasi.v1.Itinerary.trip:type_name -> wherewasi.v1.Trip
-	17, // 33: wherewasi.v1.Itinerary.days:type_name -> wherewasi.v1.ItineraryDay
-	5,  // 34: wherewasi.v1.DayTimeline.local_day:type_name -> wherewasi.v1.CalendarDate
-	13, // 35: wherewasi.v1.DayTimeline.visits:type_name -> wherewasi.v1.Visit
-	14, // 36: wherewasi.v1.DayTimeline.night:type_name -> wherewasi.v1.Night
-	12, // 37: wherewasi.v1.DayTimeline.photos:type_name -> wherewasi.v1.LocatedPhoto
-	5,  // 38: wherewasi.v1.PlaceStay.first_day:type_name -> wherewasi.v1.CalendarDate
-	5,  // 39: wherewasi.v1.PlaceStay.last_day:type_name -> wherewasi.v1.CalendarDate
-	11, // 40: wherewasi.v1.PlaceStay.towns_in_order:type_name -> wherewasi.v1.Place
-	20, // 41: wherewasi.v1.PlaceDays.stays:type_name -> wherewasi.v1.PlaceStay
-	22, // 42: wherewasi.v1.Year.away_by_country:type_name -> wherewasi.v1.CountryNights
-	23, // 43: wherewasi.v1.Years.years:type_name -> wherewasi.v1.Year
-	5,  // 44: wherewasi.v1.Overview.first_day:type_name -> wherewasi.v1.CalendarDate
-	5,  // 45: wherewasi.v1.Overview.last_day:type_name -> wherewasi.v1.CalendarDate
-	9,  // 46: wherewasi.v1.Overview.current_home:type_name -> wherewasi.v1.KnownPlace
-	16, // 47: wherewasi.v1.Overview.latest_trips:type_name -> wherewasi.v1.Trip
-	16, // 48: wherewasi.v1.Trips.trips:type_name -> wherewasi.v1.Trip
-	17, // 49: wherewasi.v1.Days.days:type_name -> wherewasi.v1.ItineraryDay
-	50, // [50:50] is the sub-list for method output_type
-	50, // [50:50] is the sub-list for method input_type
-	50, // [50:50] is the sub-list for extension type_name
-	50, // [50:50] is the sub-list for extension extendee
-	0,  // [0:50] is the sub-list for field type_name
+	22, // 17: wherewasi.v1.Visit.spots:type_name -> wherewasi.v1.Spot
+	7,  // 18: wherewasi.v1.Night.evening:type_name -> wherewasi.v1.CalendarDate
+	13, // 19: wherewasi.v1.Night.place:type_name -> wherewasi.v1.Place
+	2,  // 20: wherewasi.v1.Night.known_place_kind:type_name -> wherewasi.v1.KnownPlaceKind
+	4,  // 21: wherewasi.v1.Night.source:type_name -> wherewasi.v1.NightSource
+	13, // 22: wherewasi.v1.Night.last_evening_place:type_name -> wherewasi.v1.Place
+	13, // 23: wherewasi.v1.Night.next_morning_place:type_name -> wherewasi.v1.Place
+	9,  // 24: wherewasi.v1.Night.last_evening_time:type_name -> wherewasi.v1.LocalTime
+	9,  // 25: wherewasi.v1.Night.next_morning_time:type_name -> wherewasi.v1.LocalTime
+	13, // 26: wherewasi.v1.Stop.place:type_name -> wherewasi.v1.Place
+	2,  // 27: wherewasi.v1.Stop.known_place_kind:type_name -> wherewasi.v1.KnownPlaceKind
+	7,  // 28: wherewasi.v1.Stop.first_evening:type_name -> wherewasi.v1.CalendarDate
+	7,  // 29: wherewasi.v1.Trip.left:type_name -> wherewasi.v1.CalendarDate
+	7,  // 30: wherewasi.v1.Trip.back:type_name -> wherewasi.v1.CalendarDate
+	17, // 31: wherewasi.v1.Trip.stops:type_name -> wherewasi.v1.Stop
+	18, // 32: wherewasi.v1.Trip.places_in_order:type_name -> wherewasi.v1.NamedPlace
+	7,  // 33: wherewasi.v1.ItineraryDay.local_day:type_name -> wherewasi.v1.CalendarDate
+	16, // 34: wherewasi.v1.ItineraryDay.night:type_name -> wherewasi.v1.Night
+	21, // 35: wherewasi.v1.ItineraryDay.places:type_name -> wherewasi.v1.DayPlace
+	5,  // 36: wherewasi.v1.DayPlace.kind:type_name -> wherewasi.v1.DayPlaceKind
+	22, // 37: wherewasi.v1.DayPlace.spots:type_name -> wherewasi.v1.Spot
+	18, // 38: wherewasi.v1.DayPlace.neighbourhoods:type_name -> wherewasi.v1.NamedPlace
+	13, // 39: wherewasi.v1.DayPlace.region:type_name -> wherewasi.v1.Place
+	6,  // 40: wherewasi.v1.Spot.kind:type_name -> wherewasi.v1.SpotKind
+	19, // 41: wherewasi.v1.Itinerary.trip:type_name -> wherewasi.v1.Trip
+	20, // 42: wherewasi.v1.Itinerary.days:type_name -> wherewasi.v1.ItineraryDay
+	7,  // 43: wherewasi.v1.DayTimeline.local_day:type_name -> wherewasi.v1.CalendarDate
+	15, // 44: wherewasi.v1.DayTimeline.visits:type_name -> wherewasi.v1.Visit
+	16, // 45: wherewasi.v1.DayTimeline.night:type_name -> wherewasi.v1.Night
+	14, // 46: wherewasi.v1.DayTimeline.photos:type_name -> wherewasi.v1.LocatedPhoto
+	7,  // 47: wherewasi.v1.PlaceStay.first_day:type_name -> wherewasi.v1.CalendarDate
+	7,  // 48: wherewasi.v1.PlaceStay.last_day:type_name -> wherewasi.v1.CalendarDate
+	13, // 49: wherewasi.v1.PlaceStay.towns_in_order:type_name -> wherewasi.v1.Place
+	25, // 50: wherewasi.v1.PlaceDays.stays:type_name -> wherewasi.v1.PlaceStay
+	27, // 51: wherewasi.v1.Year.away_by_country:type_name -> wherewasi.v1.CountryNights
+	28, // 52: wherewasi.v1.Years.years:type_name -> wherewasi.v1.Year
+	7,  // 53: wherewasi.v1.Overview.first_day:type_name -> wherewasi.v1.CalendarDate
+	7,  // 54: wherewasi.v1.Overview.last_day:type_name -> wherewasi.v1.CalendarDate
+	11, // 55: wherewasi.v1.Overview.current_home:type_name -> wherewasi.v1.KnownPlace
+	19, // 56: wherewasi.v1.Overview.latest_trips:type_name -> wherewasi.v1.Trip
+	19, // 57: wherewasi.v1.Trips.trips:type_name -> wherewasi.v1.Trip
+	20, // 58: wherewasi.v1.Days.days:type_name -> wherewasi.v1.ItineraryDay
+	59, // [59:59] is the sub-list for method output_type
+	59, // [59:59] is the sub-list for method input_type
+	59, // [59:59] is the sub-list for extension type_name
+	59, // [59:59] is the sub-list for extension extendee
+	0,  // [0:59] is the sub-list for field type_name
 }
 
 func init() { file_wherewasi_v1_where_was_i_proto_init() }
@@ -2407,14 +2832,15 @@ func file_wherewasi_v1_where_was_i_proto_init() {
 		return
 	}
 	file_wherewasi_v1_where_was_i_proto_msgTypes[8].OneofWrappers = []any{}
-	file_wherewasi_v1_where_was_i_proto_msgTypes[14].OneofWrappers = []any{}
+	file_wherewasi_v1_where_was_i_proto_msgTypes[9].OneofWrappers = []any{}
+	file_wherewasi_v1_where_was_i_proto_msgTypes[17].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_wherewasi_v1_where_was_i_proto_rawDesc), len(file_wherewasi_v1_where_was_i_proto_rawDesc)),
-			NumEnums:      5,
-			NumMessages:   23,
+			NumEnums:      7,
+			NumMessages:   26,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

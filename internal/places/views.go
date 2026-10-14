@@ -37,39 +37,51 @@ func (x *Index) Day(day Date) *wherewasiv1.DayTimeline {
 	if n, has := x.nights[day]; has {
 		out.Night = n.proto
 	}
-	var current []photo
+	photos := x.byDay[day]
+	names := placeNames(photos)
+	spotsOf := photoSpots(photos, names)
+	var current []int
 	flush := func() {
 		if len(current) == 0 {
 			return
 		}
-		first, last := current[0], current[len(current)-1]
+		first, last := photos[current[0]], photos[current[len(current)-1]]
 		visit := &wherewasiv1.Visit{Start: first.proto.Time, End: last.proto.Time, Place: TownLevel(first.proto.Place),
-			KnownPlace: x.knownLabelAt(first), KnownPlaceKind: x.knownKindAt(first), PhotoCount: int32(len(current))}
+			PlaceName: names[current[0]], KnownPlace: x.knownLabelAt(first), KnownPlaceKind: x.knownKindAt(first),
+			PhotoCount: int32(len(current))}
 		if km, ok := x.kmFromHome(first); ok {
 			visit.KmFromHome = &km
 		}
-		for _, p := range current {
-			visit.Neighbourhoods = appendNew(visit.Neighbourhoods, p.proto.Place.Neighbourhood)
-			if poi := p.proto.Place.PointOfInterest; poi != p.proto.Place.Town {
-				visit.PointsOfInterest = appendNew(visit.PointsOfInterest, poi)
+		byName := map[string]*wherewasiv1.Spot{}
+		for _, i := range current {
+			visit.Neighbourhoods = appendNew(visit.Neighbourhoods, photos[i].proto.Place.Neighbourhood)
+			for _, found := range spotsOf[i] {
+				spot := byName[found.Name]
+				if spot == nil {
+					spot = found
+					byName[found.Name] = spot
+					visit.Spots = append(visit.Spots, spot)
+				}
+				spot.PhotoCount++
 			}
 		}
 		out.Visits = append(out.Visits, visit)
 		current = nil
 	}
-	for _, p := range x.byDay[day] {
+	for i, p := range photos {
 		out.Photos = append(out.Photos, p.proto)
 		if km, ok := x.kmFromHome(p); ok && (out.MaxKmFromHome == nil || km > *out.MaxKmFromHome) {
 			out.MaxKmFromHome = &km
 		}
 		if len(current) > 0 {
-			previous := current[len(current)-1]
-			if townKey(previous.proto.Place) != townKey(p.proto.Place) || previous.proto.Place.Neighbourhood != p.proto.Place.Neighbourhood ||
+			before := current[len(current)-1]
+			previous := photos[before]
+			if names[before] != names[i] || previous.proto.Place.Neighbourhood != p.proto.Place.Neighbourhood ||
 				x.knownLabelAt(previous) != x.knownLabelAt(p) {
 				flush()
 			}
 		}
-		current = append(current, p)
+		current = append(current, i)
 	}
 	flush()
 	return out

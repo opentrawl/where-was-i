@@ -3,6 +3,7 @@
 package main
 
 import (
+	_ "embed"
 	"errors"
 	"fmt"
 	"io"
@@ -31,24 +32,29 @@ Usage:
   where-was-i days                    the latest days, one line each
   where-was-i in PLACE                your visits to a country, region, town or landmark
   where-was-i years                   nights at home, with family and away, by year
+  where-was-i agent-instructions      how an agent should use where-was-i
 
 Flags:
   --from DATE, --to DATE              only trips, days and visits in this range of dates (YYYY-MM-DD)
   --limit N                           how many rows to show (default 10)
   --all                               trips: also list one-night stays where no photo shows you waking up away
-  --format human|textproto            textproto prints the typed messages: every field, down to each photo
+  --format human|textproto            textproto prints every field as typed text; on DATE adds every photo's
+                                      GPS position, time and Apple place fields
   --version                           print the version
   --library PATH                      a Photos.sqlite other than your system library
   --known-places PATH                 your homes, family homes and workplaces, with dates (default ~/.config/where-was-i/known-places.textproto)
 
-Agents: output sent to another program is never wrapped, one row per line. Lists say how many rows they show
-and how to see more. --format textproto gives every field.
+Agents: run where-was-i agent-instructions. Output sent to another program is never wrapped, one row per line.
+Lists say how many rows they show and how to see more.
 
 Examples:
   where-was-i trips --from 2024-01-01
   where-was-i on 2024-05-07
   where-was-i in Scotland
 `
+
+//go:embed SKILL.md
+var agentInstructions string
 
 // Version is set at release time with -ldflags "-X main.Version=...".
 var Version = "dev"
@@ -96,6 +102,12 @@ func parseDay(text string) (places.Date, error) {
 func parse(args []string) (options, error) {
 	o := options{limit: 10, format: "human", library: sources.DefaultLibrary, knownFile: sources.DefaultKnownPlacesFile}
 	var positional []string
+	repeat := func(flag, value string) {
+		if strings.ContainsAny(value, " '\"$\\") {
+			value = "'" + strings.ReplaceAll(value, "'", `'\''`) + "'"
+		}
+		render.RepeatedFlags = append(render.RepeatedFlags, [2]string{flag, value})
+	}
 	for i := 0; i < len(args); i++ {
 		arg := args[i]
 		if !strings.HasPrefix(arg, "-") {
@@ -113,6 +125,7 @@ func parse(args []string) (options, error) {
 		}
 		if name == "all" {
 			o.all = true
+			repeat("all", "")
 			continue
 		}
 		if !hasValue {
@@ -133,6 +146,7 @@ func parse(args []string) (options, error) {
 			} else {
 				o.to = &day
 			}
+			repeat(name, value)
 		case "limit":
 			n, err := strconv.Atoi(value)
 			if err != nil || n < 1 {
@@ -146,8 +160,10 @@ func parse(args []string) (options, error) {
 			o.format = value
 		case "library":
 			o.library = value
+			repeat(name, value)
 		case "known-places":
 			o.knownFile = value
+			repeat(name, value)
 		default:
 			return o, usageError{"unknown flag --" + name}
 		}
@@ -172,6 +188,10 @@ func run(args []string, out io.Writer) error {
 	}
 	if o.command == "help" {
 		_, err := io.WriteString(out, help)
+		return err
+	}
+	if o.command == "agent-instructions" {
+		_, err := io.WriteString(out, agentInstructions)
 		return err
 	}
 	if o.command == "version" {
