@@ -40,6 +40,7 @@ func (x *Index) Day(day Date) *wherewasiv1.DayTimeline {
 	photos := x.byDay[day]
 	names := placeNames(photos)
 	spotsOf := photoSpots(photos, names)
+	moving := inTransit(photos)
 	var current []int
 	flush := func() {
 		if len(current) == 0 {
@@ -48,7 +49,10 @@ func (x *Index) Day(day Date) *wherewasiv1.DayTimeline {
 		first, last := photos[current[0]], photos[current[len(current)-1]]
 		visit := &wherewasiv1.Visit{Start: first.proto.Time, End: last.proto.Time, Place: TownLevel(first.proto.Place),
 			PlaceName: names[current[0]], KnownPlace: x.knownLabelAt(first), KnownPlaceKind: x.knownKindAt(first),
-			PhotoCount: int32(len(current))}
+			PhotoCount: int32(len(current)), Travelling: moving[current[0]]}
+		if visit.Travelling {
+			visit.EndPlaceName = names[current[len(current)-1]]
+		}
 		if km, ok := x.kmFromHome(first); ok {
 			visit.KmFromHome = &km
 		}
@@ -76,8 +80,9 @@ func (x *Index) Day(day Date) *wherewasiv1.DayTimeline {
 		if len(current) > 0 {
 			before := current[len(current)-1]
 			previous := photos[before]
-			if names[before] != names[i] || previous.proto.Place.Neighbourhood != p.proto.Place.Neighbourhood ||
-				x.knownLabelAt(previous) != x.knownLabelAt(p) {
+			changed := names[before] != names[i] || previous.proto.Place.Neighbourhood != p.proto.Place.Neighbourhood ||
+				x.knownLabelAt(previous) != x.knownLabelAt(p)
+			if moving[before] != moving[i] || (!moving[i] && changed) {
 				flush()
 			}
 		}
@@ -253,4 +258,32 @@ func (x *Index) Years(today Date) *wherewasiv1.Years {
 		out.Years = append(out.Years, year)
 	}
 	return out
+}
+
+// inTransit marks the photos taken on the move: reached from the photo a minute or more before, and left for the photo
+// a minute or more after, faster than InTransitKmPerHour, as from a plane or a fast train. Measuring over a minute
+// keeps a burst of photos sharing one position on the move. The photo at the arrival gate is not on the move.
+func inTransit(photos []photo) []bool {
+	kmPerHour := func(a, b photo) float64 {
+		return kmBetween(a.proto.Location, b.proto.Location) / b.local.Sub(a.local).Hours()
+	}
+	moving := make([]bool, len(photos))
+	for i := range photos {
+		before, after := -1, -1
+		for j := i - 1; j >= 0; j-- {
+			if photos[i].local.Sub(photos[j].local) >= time.Minute {
+				before = j
+				break
+			}
+		}
+		for k := i + 1; k < len(photos); k++ {
+			if photos[k].local.Sub(photos[i].local) >= time.Minute {
+				after = k
+				break
+			}
+		}
+		moving[i] = before >= 0 && after >= 0 &&
+			kmPerHour(photos[before], photos[i]) > InTransitKmPerHour && kmPerHour(photos[i], photos[after]) > InTransitKmPerHour
+	}
+	return moving
 }

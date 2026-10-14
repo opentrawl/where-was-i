@@ -75,7 +75,7 @@ func townName(p *wherewasiv1.Place) string {
 			return v
 		}
 	}
-	return "somewhere unnamed"
+	return "a place Apple Photos has not named yet"
 }
 
 // townWithRegion is the town and Apple's state, for example "Portree, Scotland" or "Kyoto, Kyoto".
@@ -198,6 +198,14 @@ func townNames(places []*wherewasiv1.Place) []string {
 	return names
 }
 
+// tripDates is "3 – 17 May 2024", or "3 May 2024 – now" for a trip you are still on.
+func tripDates(t *wherewasiv1.Trip) string {
+	if t.Ongoing {
+		return goDate(t.Left).Format("2 Jan 2006") + " – now"
+	}
+	return dateRange(t.Left, t.Back)
+}
+
 // route is the places of a trip with most photos, in the order you went, saying how many it leaves out.
 func route(trip *wherewasiv1.Trip) string {
 	var parts []string
@@ -312,7 +320,7 @@ func (w *writer) hint(text string) {
 func tripRows(trips []*wherewasiv1.Trip) [][]string {
 	var rows [][]string
 	for _, t := range trips {
-		rows = append(rows, []string{dateRange(t.Left, t.Back), strconv.Itoa(int(t.Nights)), strings.Join(t.Countries, ", "), route(t)})
+		rows = append(rows, []string{tripDates(t), strconv.Itoa(int(t.Nights)), strings.Join(t.Countries, ", "), route(t)})
 	}
 	return rows
 }
@@ -425,7 +433,11 @@ func dayRows(days []*wherewasiv1.ItineraryDay, merge bool) [][]string {
 func Itinerary(out io.Writer, it *wherewasiv1.Itinerary) error {
 	w := &writer{out: out}
 	t := it.Trip
-	summary := []string{dateRange(t.Left, t.Back), plural(t.Nights, "night away", "nights away"), plural(t.PhotoCount, "photo", "photos"),
+	nights := plural(t.Nights, "night away", "nights away")
+	if t.Ongoing {
+		nights += " so far"
+	}
+	summary := []string{tripDates(t), nights, plural(t.PhotoCount, "photo", "photos"),
 		strings.Join(t.Countries, ", ")}
 	w.line("%s", strings.Join(summary, " · "))
 	if t.NightsWithoutPhotos > 0 {
@@ -453,7 +465,9 @@ func Day(out io.Writer, d *wherewasiv1.DayTimeline) error {
 	first := d.Visits[0].Place
 	var countries []string
 	for _, v := range d.Visits {
-		countries = appendNew(countries, v.Place.Country)
+		if !v.Travelling { // countries flown over are not countries visited
+			countries = appendNew(countries, v.Place.Country)
+		}
 	}
 	heading := []string{dayLabel(d.LocalDay), strings.Join(countries, ", ")}
 	if d.TripLink != "" {
@@ -477,22 +491,27 @@ func Day(out io.Writer, d *wherewasiv1.DayTimeline) error {
 		if _, known := kindWord[v.KnownPlaceKind]; !known && v.PlaceName != "" {
 			where[0] = v.PlaceName
 		}
+		if v.Travelling {
+			where = []string{"travelling, " + v.PlaceName + " to " + v.EndPlaceName}
+		}
 		var neighbourhoods []string
 		for _, name := range v.Neighbourhoods {
 			if name != where[0] {
 				neighbourhoods = append(neighbourhoods, name)
 			}
 		}
-		if len(neighbourhoods) > 0 {
+		if len(neighbourhoods) > 0 && !v.Travelling {
 			where = append(where, strings.Join(neighbourhoods, ", "))
 		}
-		if v.Place.State != previous.State || v.Place.Country != previous.Country {
-			where = append(where, v.Place.State)
+		if !v.Travelling {
+			if v.Place.State != previous.State || v.Place.Country != previous.Country {
+				where = append(where, v.Place.State)
+			}
+			if v.Place.Country != previous.Country {
+				where = append(where, v.Place.Country)
+			}
+			previous = v.Place
 		}
-		if v.Place.Country != previous.Country {
-			where = append(where, v.Place.Country)
-		}
-		previous = v.Place
 		local := timeSpan(v.Start, v.End, false)
 		if len(offsets) > 1 {
 			local += " " + offsetName(v.Start.UtcOffsetSeconds)

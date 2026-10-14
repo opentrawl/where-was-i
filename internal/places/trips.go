@@ -19,6 +19,9 @@ type night struct {
 func (x *Index) workOutNights() {
 	x.nights = map[Date]*night{}
 	for _, day := range x.days {
+		if !day.Before(x.today.Time) {
+			continue // tonight has not happened yet
+		}
 		photos := x.byDay[day]
 		evening := photos[len(photos)-1]
 		var next *photo
@@ -85,6 +88,13 @@ func (x *Index) workOutTrips() {
 		}
 	}
 	flush()
+	// A trip whose last night away was last night, with today's latest photo still away, has not ended.
+	if n := len(x.trips); n > 0 {
+		t, today := x.trips[n-1], x.byDay[x.today]
+		if !t.back.Before(x.today.Time) && len(today) > 0 && x.isAway(today[len(today)-1]) {
+			t.proto.Ongoing = true
+		}
+	}
 }
 
 func (x *Index) newTrip(left, back Date) *trip {
@@ -131,6 +141,22 @@ func (x *Index) newTrip(left, back Date) *trip {
 	return &trip{proto: t, left: left, back: back}
 }
 
+// poiKey and roadKey tell apart places that share a name: an airport "Terminal" in two countries, or a "Main St"
+// in two towns.
+func poiKey(p *wherewasiv1.Place) string {
+	if p.GetPointOfInterest() == "" {
+		return ""
+	}
+	return p.GetPointOfInterest() + "\x00" + p.GetState() + "\x00" + p.GetCountryCode()
+}
+
+func roadKey(p *wherewasiv1.Place) string {
+	if p.GetRoad() == "" {
+		return ""
+	}
+	return p.GetRoad() + "\x00" + townKey(p)
+}
+
 // spreadKm is, for each name, how far apart the photos with that name are: the diagonal of the box around them.
 // Photos more than PointOfInterestIsAnAreaKm apart mean you moved through the place, as through a national park or
 // along a highway, rather than stopping at one spot in it.
@@ -159,12 +185,12 @@ func spreadKm(photos []photo, nameOf func(*wherewasiv1.Place) string) map[string
 // placeNames are where each of a day's photos was taken, at the scale of a town: the point of interest when you
 // moved through it that day, as through a national park, and otherwise the town, so a hotel or a shop stays a spot.
 func placeNames(photos []photo) []string {
-	spread := spreadKm(photos, (*wherewasiv1.Place).GetPointOfInterest)
+	spread := spreadKm(photos, poiKey)
 	names := make([]string, len(photos))
 	for i, p := range photos {
 		place := p.proto.Place
 		names[i] = firstNonEmptyString(place.GetTown(), place.GetCounty(), place.GetState(), place.GetCountry())
-		if poi := place.GetPointOfInterest(); poi != "" && (names[i] == "" || spread[poi] > PointOfInterestIsAnAreaKm) {
+		if poi := place.GetPointOfInterest(); poi != "" && (names[i] == "" || spread[poiKey(place)] > PointOfInterestIsAnAreaKm) {
 			names[i] = poi
 		}
 	}
@@ -175,15 +201,15 @@ func placeNames(photos []photo) []string {
 // point of interest whose photos that day are within PointOfInterestIsAnAreaKm of each other, as a trail, a viewpoint
 // or a museum is. A road you drove along, or a park you moved through, is not a spot. Photo counts are left at zero.
 func photoSpots(photos []photo, names []string) [][]*wherewasiv1.Spot {
-	roadSpread := spreadKm(photos, (*wherewasiv1.Place).GetRoad)
-	poiSpread := spreadKm(photos, (*wherewasiv1.Place).GetPointOfInterest)
+	roadSpread := spreadKm(photos, roadKey)
+	poiSpread := spreadKm(photos, poiKey)
 	spots := make([][]*wherewasiv1.Spot, len(photos))
 	for i, p := range photos {
 		place := p.proto.Place
-		if place.PointOfInterest != "" && place.Road != "" && roadSpread[place.Road] <= PointOfInterestIsAnAreaKm {
+		if place.PointOfInterest != "" && place.Road != "" && roadSpread[roadKey(place)] <= PointOfInterestIsAnAreaKm {
 			spots[i] = append(spots[i], &wherewasiv1.Spot{Name: place.Road, Kind: wherewasiv1.SpotKind_SPOT_KIND_ROAD, Neighbourhood: place.Neighbourhood})
 		}
-		if place.PointOfInterest != "" && place.PointOfInterest != names[i] && poiSpread[place.PointOfInterest] <= PointOfInterestIsAnAreaKm {
+		if place.PointOfInterest != "" && place.PointOfInterest != names[i] && poiSpread[poiKey(place)] <= PointOfInterestIsAnAreaKm {
 			spots[i] = append(spots[i], &wherewasiv1.Spot{Name: place.PointOfInterest, Kind: wherewasiv1.SpotKind_SPOT_KIND_POINT_OF_INTEREST,
 				Neighbourhood: place.Neighbourhood})
 		}

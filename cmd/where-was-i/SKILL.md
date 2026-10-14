@@ -34,7 +34,8 @@ These are fixed rules, not judgements. Check them against the photos when a conc
 
 - A day runs from 04:00 to 04:00 local time, so a late night counts with its evening.
 - A night is at home or with family when a photo that evening or the next day was taken there. Otherwise it is where the first photo of the next morning, before noon, was taken, or failing that the last photo of the evening. When those two photos are more than 300 km apart, the night was spent travelling. This is wrong when the user drove somewhere before their first morning photo, or after their last evening photo. When the two photos are in different towns, `on DATE` says where and when each was taken, and `night` keeps both photos' places and times. A night whose photo was inside a park the day went to reads as the park, not its postal town.
-- A trip is a run of nights more than 25 km from home and family, with up to two nights without photos inside it. One-night stays with no morning photo away are left out unless you pass `--all`.
+- A trip is a run of nights more than 25 km from home and family, with up to two nights without photos inside it. One-night stays with no morning photo away are left out unless you pass `--all`. A trip the user is still on reads "– now", and today has no night yet.
+- In `on DATE`, photos taken while moving faster than 200 km/h, measured over a minute or more each side, form one `travelling` stretch, as on a flight. Countries flown over are not counted as visited.
 - A point of interest counts as where the user went when the day's photos in it are more than 2 km apart. Otherwise it is a spot within its town. A road counts as a spot only when its photos that day are within 2 km of each other, so roads the user drove along are left out.
 
 ## Know the limits of the evidence

@@ -225,7 +225,8 @@ func run(args []string, out io.Writer) error {
 	if err != nil {
 		return fmt.Errorf("time-zone map: %w", err)
 	}
-	index := places.Build(photos, appleTrips, places.WithAppleHome(known, photos), zones.(*tzf.DefaultFinder))
+	today := places.DateOf(time.Now().Add(-places.DayStartsAt))
+	index := places.Build(photos, appleTrips, places.WithAppleHome(known, photos), zones.(*tzf.DefaultFinder), today)
 
 	within := places.Everything
 	if o.from != nil {
@@ -234,7 +235,6 @@ func run(args []string, out io.Writer) error {
 	if o.to != nil {
 		within.Last = *o.to
 	}
-	today := places.DateOf(time.Now())
 
 	switch o.command {
 	case "":

@@ -118,6 +118,8 @@ message Visit {
   KnownPlaceKind known_place_kind = 9;
   string place_name = 10;          // the town, or the area you moved through, as in ItineraryDay
   repeated Spot spots = 11;        // where you stopped in this stretch, in time order
+  bool travelling = 12;            // photos taken moving faster than 200 km/h, as from a plane or a fast train
+  string end_place_name = 13;      // for a travelling stretch, where its last photo was taken
 }
 
 enum NightSource {
@@ -181,6 +183,7 @@ message Trip {
   repeated NamedPlace places_in_order = 11; // every place a day of the trip went to, in the order first seen, with how
                                             // many photos it has on those days
   repeated string route = 12;               // the ten of those with most photos, in the order you went
+  bool ongoing = 13;                        // you are still away: back is today, and today has no night yet
 }
 
 // One day of a trip.

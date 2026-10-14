@@ -989,8 +989,10 @@ type Visit struct {
 	KmFromHome     *float64               `protobuf:"fixed64,7,opt,name=km_from_home,json=kmFromHome,proto3,oneof" json:"km_from_home,omitempty"`
 	PhotoCount     int32                  `protobuf:"varint,8,opt,name=photo_count,json=photoCount,proto3" json:"photo_count,omitempty"`
 	KnownPlaceKind KnownPlaceKind         `protobuf:"varint,9,opt,name=known_place_kind,json=knownPlaceKind,proto3,enum=wherewasi.v1.KnownPlaceKind" json:"known_place_kind,omitempty"`
-	PlaceName      string                 `protobuf:"bytes,10,opt,name=place_name,json=placeName,proto3" json:"place_name,omitempty"` // the town, or the area you moved through, as in ItineraryDay
-	Spots          []*Spot                `protobuf:"bytes,11,rep,name=spots,proto3" json:"spots,omitempty"`                          // where you stopped in this stretch, in time order
+	PlaceName      string                 `protobuf:"bytes,10,opt,name=place_name,json=placeName,proto3" json:"place_name,omitempty"`            // the town, or the area you moved through, as in ItineraryDay
+	Spots          []*Spot                `protobuf:"bytes,11,rep,name=spots,proto3" json:"spots,omitempty"`                                     // where you stopped in this stretch, in time order
+	Travelling     bool                   `protobuf:"varint,12,opt,name=travelling,proto3" json:"travelling,omitempty"`                          // photos taken moving faster than 200 km/h, as from a plane or a fast train
+	EndPlaceName   string                 `protobuf:"bytes,13,opt,name=end_place_name,json=endPlaceName,proto3" json:"end_place_name,omitempty"` // for a travelling stretch, where its last photo was taken
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -1093,6 +1095,20 @@ func (x *Visit) GetSpots() []*Spot {
 		return x.Spots
 	}
 	return nil
+}
+
+func (x *Visit) GetTravelling() bool {
+	if x != nil {
+		return x.Travelling
+	}
+	return false
+}
+
+func (x *Visit) GetEndPlaceName() string {
+	if x != nil {
+		return x.EndPlaceName
+	}
+	return ""
 }
 
 // Where you spent the night after a local day, as far as photos show. The evening's last photo and the next day's
@@ -1409,7 +1425,8 @@ type Trip struct {
 	NightsConfirmedByMorning int32         `protobuf:"varint,10,opt,name=nights_confirmed_by_morning,json=nightsConfirmedByMorning,proto3" json:"nights_confirmed_by_morning,omitempty"` // nights where the next morning's first photo was taken away from home
 	PlacesInOrder            []*NamedPlace `protobuf:"bytes,11,rep,name=places_in_order,json=placesInOrder,proto3" json:"places_in_order,omitempty"`                                     // every place a day of the trip went to, in the order first seen, with how
 	// many photos it has on those days
-	Route         []string `protobuf:"bytes,12,rep,name=route,proto3" json:"route,omitempty"` // the ten of those with most photos, in the order you went
+	Route         []string `protobuf:"bytes,12,rep,name=route,proto3" json:"route,omitempty"`      // the ten of those with most photos, in the order you went
+	Ongoing       bool     `protobuf:"varint,13,opt,name=ongoing,proto3" json:"ongoing,omitempty"` // you are still away: back is today, and today has no night yet
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1526,6 +1543,13 @@ func (x *Trip) GetRoute() []string {
 		return x.Route
 	}
 	return nil
+}
+
+func (x *Trip) GetOngoing() bool {
+	if x != nil {
+		return x.Ongoing
+	}
+	return false
 }
 
 // One day of a trip.
@@ -2523,7 +2547,7 @@ const file_wherewasi_v1_where_was_i_proto_rawDesc = "" +
 	"\blocation\x18\x03 \x01(\v2\x14.wherewasi.v1.LatLngR\blocation\x12)\n" +
 	"\x05place\x18\x04 \x01(\v2\x13.wherewasi.v1.PlaceR\x05place\x12\x1d\n" +
 	"\n" +
-	"photo_uuid\x18\x05 \x01(\tR\tphotoUuid\"\xc5\x03\n" +
+	"photo_uuid\x18\x05 \x01(\tR\tphotoUuid\"\x8b\x04\n" +
 	"\x05Visit\x12-\n" +
 	"\x05start\x18\x01 \x01(\v2\x17.wherewasi.v1.LocalTimeR\x05start\x12)\n" +
 	"\x03end\x18\x02 \x01(\v2\x17.wherewasi.v1.LocalTimeR\x03end\x12)\n" +
@@ -2539,7 +2563,11 @@ const file_wherewasi_v1_where_was_i_proto_rawDesc = "" +
 	"\n" +
 	"place_name\x18\n" +
 	" \x01(\tR\tplaceName\x12(\n" +
-	"\x05spots\x18\v \x03(\v2\x12.wherewasi.v1.SpotR\x05spotsB\x0f\n" +
+	"\x05spots\x18\v \x03(\v2\x12.wherewasi.v1.SpotR\x05spots\x12\x1e\n" +
+	"\n" +
+	"travelling\x18\f \x01(\bR\n" +
+	"travelling\x12$\n" +
+	"\x0eend_place_name\x18\r \x01(\tR\fendPlaceNameB\x0f\n" +
 	"\r_km_from_homeJ\x04\b\x05\x10\x06\"\xff\x05\n" +
 	"\x05Night\x124\n" +
 	"\aevening\x18\x01 \x01(\v2\x1a.wherewasi.v1.CalendarDateR\aevening\x12)\n" +
@@ -2577,7 +2605,7 @@ const file_wherewasi_v1_where_was_i_proto_rawDesc = "" +
 	"NamedPlace\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1f\n" +
 	"\vphoto_count\x18\x02 \x01(\x05R\n" +
-	"photoCount\"\xf2\x03\n" +
+	"photoCount\"\x8c\x04\n" +
 	"\x04Trip\x12\x12\n" +
 	"\x04link\x18\x01 \x01(\tR\x04link\x12.\n" +
 	"\x04left\x18\x02 \x01(\v2\x1a.wherewasi.v1.CalendarDateR\x04left\x12.\n" +
@@ -2592,7 +2620,8 @@ const file_wherewasi_v1_where_was_i_proto_rawDesc = "" +
 	"\x1bnights_confirmed_by_morning\x18\n" +
 	" \x01(\x05R\x18nightsConfirmedByMorning\x12@\n" +
 	"\x0fplaces_in_order\x18\v \x03(\v2\x18.wherewasi.v1.NamedPlaceR\rplacesInOrder\x12\x14\n" +
-	"\x05route\x18\f \x03(\tR\x05route\"\x94\x02\n" +
+	"\x05route\x18\f \x03(\tR\x05route\x12\x18\n" +
+	"\aongoing\x18\r \x01(\bR\aongoing\"\x94\x02\n" +
 	"\fItineraryDay\x127\n" +
 	"\tlocal_day\x18\x01 \x01(\v2\x1a.wherewasi.v1.CalendarDateR\blocalDay\x12)\n" +
 	"\x05night\x18\x04 \x01(\v2\x13.wherewasi.v1.NightR\x05night\x12\x1f\n" +

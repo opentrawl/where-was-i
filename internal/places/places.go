@@ -25,6 +25,7 @@ const (
 	MaxNightsWithoutPhotosInTrip = 2             // nights without photos a trip may bridge
 	PointOfInterestIsAnAreaKm    = 2
 	WentToShareOfPhotos          = 0.25 // a place a day went to holds at least this share of its photos
+	InTransitKmPerHour           = 200  // faster than this between photos, both arriving and leaving, is a plane or train
 	TravellingNightKm            = 300  // evening and next-morning photos this far apart mean the night was spent travelling
 )
 
@@ -116,11 +117,14 @@ type Index struct {
 	appleTrips map[Date][]string
 	nights     map[Date]*night
 	trips      []*trip // oldest first
+	today      Date
 }
 
 // Build reads nothing itself: the sources are passed in.
-func Build(libraryPhotos []sources.LibraryPhoto, appleTrips []sources.AppleTrip, known *wherewasiv1.KnownPlaces, zones *tzf.DefaultFinder) *Index {
-	index := &Index{byDay: map[Date][]photo{}, appleTrips: map[Date][]string{}}
+// today is the local day now, which has no night yet.
+func Build(libraryPhotos []sources.LibraryPhoto, appleTrips []sources.AppleTrip, known *wherewasiv1.KnownPlaces, zones *tzf.DefaultFinder,
+	today Date) *Index {
+	index := &Index{byDay: map[Date][]photo{}, appleTrips: map[Date][]string{}, today: today}
 	for _, place := range known.GetPlaces() {
 		if place.Location != nil {
 			index.known = append(index.known, knownPlace{place, dateFromProto(place.ValidFrom, earliestDate), dateFromProto(place.ValidTo, latestDate)})
