@@ -620,8 +620,8 @@ func (x *DeviceOffset) GetSource() DeviceOffsetSource {
 	return DeviceOffsetSource_DEVICE_OFFSET_SOURCE_UNSPECIFIED
 }
 
-// A place that matters to you over time: a home, family, work. Optional; without a file, home is where Apple Photos
-// says it is.
+// A place that matters to you over time: a home, family, work. Optional; Apple Photos' home is used too, unless the
+// file names a current home of its own.
 type KnownPlace struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Label         string                 `protobuf:"bytes,1,opt,name=label,proto3" json:"label,omitempty"`

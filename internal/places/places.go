@@ -217,10 +217,11 @@ func AppleHome(libraryPhotos []sources.LibraryPhoto) *wherewasiv1.KnownPlace {
 		Evidence: fmt.Sprintf("%d photos Apple Photos marks as taken at home", count)}
 }
 
-// WithAppleHome adds Apple's home to the known places when they name no home of their own.
+// WithAppleHome adds Apple's home to the known places unless they name a current home of their own: one with a
+// location and no end date. Apple knows only the current home, so a file of earlier homes adds to it.
 func WithAppleHome(known *wherewasiv1.KnownPlaces, libraryPhotos []sources.LibraryPhoto) *wherewasiv1.KnownPlaces {
 	for _, place := range known.GetPlaces() {
-		if place.Kind == wherewasiv1.KnownPlaceKind_KNOWN_PLACE_KIND_HOME {
+		if place.Kind == wherewasiv1.KnownPlaceKind_KNOWN_PLACE_KIND_HOME && place.Location != nil && place.ValidTo == nil {
 			return known
 		}
 	}

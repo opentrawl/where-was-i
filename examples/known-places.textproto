@@ -1,7 +1,8 @@
 # Known places: where you lived, stayed and worked, with the dates each applied. Optional.
 #
 # Without this file, home is where Apple Photos says it is, and Apple only knows your current home. Add earlier homes,
-# family you stay with, and workplaces so older trips and days come out right.
+# family you stay with, and workplaces so older trips and days come out right. You can leave out your current home:
+# Apple's is used unless you list a home with no valid_to.
 #
 # Copy it to ~/.config/where-was-i/known-places.textproto, or pass --known-places PATH.
 # kind: KNOWN_PLACE_KIND_HOME, KNOWN_PLACE_KIND_FAMILY, KNOWN_PLACE_KIND_WORK or KNOWN_PLACE_KIND_OTHER.

@@ -61,8 +61,8 @@ enum KnownPlaceSource {
   KNOWN_PLACE_SOURCE_APPLE_HOME = 2;    // from the photos Apple Photos marks as taken at home
 }
 
-// A place that matters to you over time: a home, family, work. Optional; without a file, home is where Apple Photos
-// says it is.
+// A place that matters to you over time: a home, family, work. Optional; Apple Photos' home is used too, unless the
+// file names a current home of its own.
 message KnownPlace {
   string label = 1;
   KnownPlaceKind kind = 2;
