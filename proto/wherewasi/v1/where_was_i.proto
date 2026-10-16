@@ -136,7 +136,7 @@ message Night {
   Place place = 2;                 // town level
   string known_place = 3;
   KnownPlaceKind known_place_kind = 9;
-  bool away = 4;                   // beyond the away distance from every home and family place
+  bool away = 4;                   // beyond the away distance from every home; with family who live further, too
   bool home_known = 8;             // false when no home is known for that date, so away can't be told
   NightSource source = 5;
   Place last_evening_place = 6;    // town level, where the evening's last photo was taken
@@ -273,9 +273,9 @@ message CountryNights {
 message Year {
   int32 year = 1;
   int32 nights_at_home = 2;
-  int32 nights_with_family = 3;
+  int32 nights_with_family = 3;          // near home or away; not counted in nights_away
   int32 nights_away = 4;
-  int32 nights_near_home = 5;            // not at a known place, but within the away distance of one
+  int32 nights_near_home = 5;            // not at home or with family, but within the away distance of home
   int32 nights_without_photos = 6;
   repeated CountryNights away_by_country = 7;
   int32 nights_home_unknown = 8;         // nights with photos before any home is known, so away can't be told

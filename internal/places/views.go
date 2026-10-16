@@ -234,6 +234,8 @@ func (x *Index) Years(today Date) *wherewasiv1.Years {
 			year.NightsWithoutPhotos++
 		case !n.proto.HomeKnown:
 			year.NightsHomeUnknown++
+		case n.proto.KnownPlaceKind == wherewasiv1.KnownPlaceKind_KNOWN_PLACE_KIND_FAMILY:
+			year.NightsWithFamily++ // near home or away
 		case n.proto.Away:
 			year.NightsAway++
 			if n.proto.Travelling {
@@ -241,8 +243,6 @@ func (x *Index) Years(today Date) *wherewasiv1.Years {
 			} else {
 				countries[day.Year()][n.proto.Place.Country]++
 			}
-		case x.atHomeOrFamily(n.photo) && x.knownPlaceAt(n.photo).proto.Kind == wherewasiv1.KnownPlaceKind_KNOWN_PLACE_KIND_FAMILY:
-			year.NightsWithFamily++
 		case x.atHomeOrFamily(n.photo):
 			year.NightsAtHome++
 		default:

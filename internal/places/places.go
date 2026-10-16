@@ -19,7 +19,7 @@ import (
 // Settings, not judgement.
 const (
 	KnownPlaceRadiusKm           = 0.5           // a photo this close to a known place is at it
-	AwayKm                       = 25.0          // a night is away when it is this far from every home and family place
+	AwayKm                       = 25.0          // a night is away when it is this far from every home
 	DayStartsAt                  = 4 * time.Hour // a local day runs from 04:00 to 04:00, so a late evening stays with its evening
 	MorningEndsAt                = 12            // the next day's first photo counts as "where you woke up" before this hour
 	MaxNightsWithoutPhotosInTrip = 2             // nights without photos a trip may bridge
@@ -259,8 +259,8 @@ func kindIn(kind wherewasiv1.KnownPlaceKind, kinds []wherewasiv1.KnownPlaceKind)
 	return false
 }
 
-var sleepingKinds = []wherewasiv1.KnownPlaceKind{wherewasiv1.KnownPlaceKind_KNOWN_PLACE_KIND_HOME,
-	wherewasiv1.KnownPlaceKind_KNOWN_PLACE_KIND_FAMILY, wherewasiv1.KnownPlaceKind_KNOWN_PLACE_KIND_OTHER}
+var kindsThatAnchorTrips = []wherewasiv1.KnownPlaceKind{wherewasiv1.KnownPlaceKind_KNOWN_PLACE_KIND_HOME,
+	wherewasiv1.KnownPlaceKind_KNOWN_PLACE_KIND_OTHER}
 
 // knownPlaceAt is the known place the photo was taken at, if any.
 func (x *Index) knownPlaceAt(p photo) *knownPlace {
@@ -284,9 +284,9 @@ func (x *Index) knownKindAt(p photo) wherewasiv1.KnownPlaceKind {
 	return wherewasiv1.KnownPlaceKind_KNOWN_PLACE_KIND_UNSPECIFIED
 }
 
-// homeKnown is true when some home or family place is known for the photo's day, so whether it is away can be told.
+// homeKnown is true when some home is known for the photo's day, so whether it is away can be told.
 func (x *Index) homeKnown(p photo) bool {
-	_, ok := x.nearestKnown(p, sleepingKinds...)
+	_, ok := x.nearestKnown(p, kindsThatAnchorTrips...)
 	return ok
 }
 
@@ -300,11 +300,12 @@ func (x *Index) kmFromHome(p photo) (float64, bool) {
 	return n.km, ok
 }
 
-// isAway is true when the photo is beyond the away distance from every place you sleep. Workplaces label photos but
-// do not anchor trips: an office near an airport would otherwise make a departure day look like a day near home.
-// Without a known home for the day it is not away: it is unknown.
+// isAway is true when the photo is beyond the away distance from every home. Family places label nights but do not
+// anchor trips: staying with family who live far away is travel. Nor do workplaces: an office near an airport would
+// otherwise make a departure day look like a day near home. Without a known home for the day it is not away: it is
+// unknown.
 func (x *Index) isAway(p photo) bool {
-	n, ok := x.nearestKnown(p, sleepingKinds...)
+	n, ok := x.nearestKnown(p, kindsThatAnchorTrips...)
 	return ok && n.km > AwayKm
 }
 

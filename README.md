@@ -146,7 +146,7 @@ Times are local to where each photo was taken, from a built-in time-zone map, be
 
 A night was at home if you took a photo there that evening or the next day. Otherwise it was where you took your first photo the next morning, or your last photo that evening if there was no morning photo. When those two photos are more than 300 km apart, the night was spent travelling. When they are in different towns, `on DATE` shows where and when each was taken.
 
-A trip is a run of nights more than 25 km from home and family. `trips` leaves out one-night stays where no photo shows you waking up away, unless you pass `--all`.
+A trip is a run of nights more than 25 km from home, including nights with family who live further away than that. `trips` leaves out one-night stays where no photo shows you waking up away, unless you pass `--all`.
 
 ## Limits
 

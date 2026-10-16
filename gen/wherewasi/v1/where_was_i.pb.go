@@ -1119,7 +1119,7 @@ type Night struct {
 	Place            *Place                 `protobuf:"bytes,2,opt,name=place,proto3" json:"place,omitempty"`     // town level
 	KnownPlace       string                 `protobuf:"bytes,3,opt,name=known_place,json=knownPlace,proto3" json:"known_place,omitempty"`
 	KnownPlaceKind   KnownPlaceKind         `protobuf:"varint,9,opt,name=known_place_kind,json=knownPlaceKind,proto3,enum=wherewasi.v1.KnownPlaceKind" json:"known_place_kind,omitempty"`
-	Away             bool                   `protobuf:"varint,4,opt,name=away,proto3" json:"away,omitempty"`                            // beyond the away distance from every home and family place
+	Away             bool                   `protobuf:"varint,4,opt,name=away,proto3" json:"away,omitempty"`                            // beyond the away distance from every home; with family who live further, too
 	HomeKnown        bool                   `protobuf:"varint,8,opt,name=home_known,json=homeKnown,proto3" json:"home_known,omitempty"` // false when no home is known for that date, so away can't be told
 	Source           NightSource            `protobuf:"varint,5,opt,name=source,proto3,enum=wherewasi.v1.NightSource" json:"source,omitempty"`
 	LastEveningPlace *Place                 `protobuf:"bytes,6,opt,name=last_evening_place,json=lastEveningPlace,proto3" json:"last_evening_place,omitempty"` // town level, where the evening's last photo was taken
@@ -2156,9 +2156,9 @@ type Year struct {
 	state               protoimpl.MessageState `protogen:"open.v1"`
 	Year                int32                  `protobuf:"varint,1,opt,name=year,proto3" json:"year,omitempty"`
 	NightsAtHome        int32                  `protobuf:"varint,2,opt,name=nights_at_home,json=nightsAtHome,proto3" json:"nights_at_home,omitempty"`
-	NightsWithFamily    int32                  `protobuf:"varint,3,opt,name=nights_with_family,json=nightsWithFamily,proto3" json:"nights_with_family,omitempty"`
+	NightsWithFamily    int32                  `protobuf:"varint,3,opt,name=nights_with_family,json=nightsWithFamily,proto3" json:"nights_with_family,omitempty"` // near home or away; not counted in nights_away
 	NightsAway          int32                  `protobuf:"varint,4,opt,name=nights_away,json=nightsAway,proto3" json:"nights_away,omitempty"`
-	NightsNearHome      int32                  `protobuf:"varint,5,opt,name=nights_near_home,json=nightsNearHome,proto3" json:"nights_near_home,omitempty"` // not at a known place, but within the away distance of one
+	NightsNearHome      int32                  `protobuf:"varint,5,opt,name=nights_near_home,json=nightsNearHome,proto3" json:"nights_near_home,omitempty"` // not at home or with family, but within the away distance of home
 	NightsWithoutPhotos int32                  `protobuf:"varint,6,opt,name=nights_without_photos,json=nightsWithoutPhotos,proto3" json:"nights_without_photos,omitempty"`
 	AwayByCountry       []*CountryNights       `protobuf:"bytes,7,rep,name=away_by_country,json=awayByCountry,proto3" json:"away_by_country,omitempty"`
 	NightsHomeUnknown   int32                  `protobuf:"varint,8,opt,name=nights_home_unknown,json=nightsHomeUnknown,proto3" json:"nights_home_unknown,omitempty"` // nights with photos before any home is known, so away can't be told

@@ -55,7 +55,7 @@ type trip struct {
 	back  Date
 }
 
-// workOutTrips finds runs of nights away. A night at or near a home or family place ends a trip; up to
+// workOutTrips finds runs of nights away. A night at or near a home ends a trip; up to
 // MaxNightsWithoutPhotosInTrip nights without photos may sit inside one.
 func (x *Index) workOutTrips() {
 	if len(x.days) == 0 {
