@@ -1635,7 +1635,7 @@ type DayPlace struct {
 	Name           string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Kind           DayPlaceKind           `protobuf:"varint,2,opt,name=kind,proto3,enum=wherewasi.v1.DayPlaceKind" json:"kind,omitempty"`
 	PhotoCount     int32                  `protobuf:"varint,3,opt,name=photo_count,json=photoCount,proto3" json:"photo_count,omitempty"`
-	WentTo         bool                   `protobuf:"varint,4,opt,name=went_to,json=wentTo,proto3" json:"went_to,omitempty"`  // it holds a quarter or more of the day's photos
+	WentTo         bool                   `protobuf:"varint,4,opt,name=went_to,json=wentTo,proto3" json:"went_to,omitempty"`  // it holds a quarter or more of the day's photos with a place name
 	Spots          []*Spot                `protobuf:"bytes,5,rep,name=spots,proto3" json:"spots,omitempty"`                   // where you stopped in it, most photos first
 	Neighbourhoods []*NamedPlace          `protobuf:"bytes,6,rep,name=neighbourhoods,proto3" json:"neighbourhoods,omitempty"` // Apple's neighbourhoods in it, most photos first
 	Region         *Place                 `protobuf:"bytes,7,opt,name=region,proto3" json:"region,omitempty"`                 // the country, state and county of its first photo
@@ -2384,7 +2384,7 @@ type Trips struct {
 	state                   protoimpl.MessageState `protogen:"open.v1"`
 	Trips                   []*Trip                `protobuf:"bytes,1,rep,name=trips,proto3" json:"trips,omitempty"`
 	TotalTrips              int32                  `protobuf:"varint,2,opt,name=total_trips,json=totalTrips,proto3" json:"total_trips,omitempty"`
-	UnconfirmedTripsLeftOut int32                  `protobuf:"varint,3,opt,name=unconfirmed_trips_left_out,json=unconfirmedTripsLeftOut,proto3" json:"unconfirmed_trips_left_out,omitempty"` // trips with no night confirmed by a morning photo away; shown with --all
+	UnconfirmedTripsLeftOut int32                  `protobuf:"varint,3,opt,name=unconfirmed_trips_left_out,json=unconfirmedTripsLeftOut,proto3" json:"unconfirmed_trips_left_out,omitempty"` // one-night trips with no morning photo away; shown with --all
 	unknownFields           protoimpl.UnknownFields
 	sizeCache               protoimpl.SizeCache
 }

@@ -208,7 +208,7 @@ message DayPlace {
   string name = 1;
   DayPlaceKind kind = 2;
   int32 photo_count = 3;
-  bool went_to = 4;                      // it holds a quarter or more of the day's photos
+  bool went_to = 4;                      // it holds a quarter or more of the day's photos with a place name
   repeated Spot spots = 5;               // where you stopped in it, most photos first
   repeated NamedPlace neighbourhoods = 6; // Apple's neighbourhoods in it, most photos first
   Place region = 7;                      // the country, state and county of its first photo
@@ -297,7 +297,7 @@ message Overview {
 message Trips {
   repeated Trip trips = 1;
   int32 total_trips = 2;
-  int32 unconfirmed_trips_left_out = 3;  // trips with no night confirmed by a morning photo away; shown with --all
+  int32 unconfirmed_trips_left_out = 3;  // one-night trips with no morning photo away; shown with --all
 }
 
 message Days {

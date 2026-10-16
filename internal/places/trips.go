@@ -352,7 +352,9 @@ func (x *Index) itineraryDay(day Date) *wherewasiv1.ItineraryDay {
 	for _, place := range row.Places {
 		slices.SortStableFunc(place.Spots, func(a, b *wherewasiv1.Spot) int { return int(b.PhotoCount - a.PhotoCount) })
 		place.Neighbourhoods = byName[place.Name].neighbourhoods.mostPhotosFirst()
-		counted = append(counted, &wherewasiv1.NamedPlace{Name: place.Name, PhotoCount: place.PhotoCount})
+		if place.Name != "" { // photos Apple placed in no town, county, state or country, as at sea or in flight
+			counted = append(counted, &wherewasiv1.NamedPlace{Name: place.Name, PhotoCount: place.PhotoCount})
+		}
 	}
 	for _, name := range withMostPhotos(counted, 4, WentToShareOfPhotos) {
 		byName[name].place.WentTo = true
@@ -368,8 +370,8 @@ func regionOf(p *wherewasiv1.Place) *wherewasiv1.Place {
 	return &wherewasiv1.Place{CountryCode: p.CountryCode, Country: p.Country, State: p.State, County: p.County}
 }
 
-// Trips are the trips that overlap the range, newest first, up to limit. Unless all is set, trips with no night
-// confirmed by a morning photo away are left out and counted: they are often a long day out with no photo at home.
+// Trips are the trips that overlap the range, newest first, up to limit. Unless all is set, one-night trips with no
+// morning photo away are left out and counted: they are often a long day out with no photo at home.
 func (x *Index) Trips(within Range, limit int, all bool) *wherewasiv1.Trips {
 	out := &wherewasiv1.Trips{}
 	for i := len(x.trips) - 1; i >= 0; i-- {
@@ -377,7 +379,7 @@ func (x *Index) Trips(within Range, limit int, all bool) *wherewasiv1.Trips {
 		if t.back.Before(within.First.Time) || t.left.After(within.Last.Time) {
 			continue
 		}
-		if !all && t.proto.NightsConfirmedByMorning == 0 {
+		if !all && t.proto.Nights == 1 && t.proto.NightsConfirmedByMorning == 0 {
 			out.UnconfirmedTripsLeftOut++
 			continue
 		}
