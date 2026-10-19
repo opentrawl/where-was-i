@@ -19,6 +19,7 @@ The levels are:
 - `trip DATE`: one trip day by day: where the user went, the spots they stopped at in brackets, and where they slept. Any date on the trip works.
 - `on DATE`: one day, stretch by stretch, in local time and UTC, using the same places and spots.
 - `days`, `in PLACE`, `years`: the latest days, visits to a named place, and nights by year.
+- `homes`: proposed earlier homes for nights whose home is unknown, with dates, Apple's town and neighbourhood, and counts of supporting nights and photos. It saves nothing.
 
 ## Read the typed output
 
@@ -42,7 +43,7 @@ These are fixed rules, not judgements. Check them against the photos when a conc
 
 - Only photos taken with Location Services on are counted. Days without them are missing, not empty.
 - Apple names postal towns, so a campsite in a national park can show the town whose post code covers it. The point of interest usually has the real name.
-- Apple Photos knows only the user's current home. Nights before then show as "home unknown", and those trips are missing until the user lists earlier homes in `~/.config/where-was-i/known-places.textproto`. If the question depends on older trips, ask the user where they lived before and when they moved, and write those homes to that file in the format of https://github.com/opentrawl/where-was-i/blob/main/examples/known-places.textproto.
+- Apple Photos knows only the user's current home. Nights before then show as "home unknown", and those trips are missing until earlier homes are listed. Run `where-was-i homes` and ask the user to confirm the proposed homes and move dates together. The rule picks the location within 0.5 km with most observed nights in a 180-day window. Both the window and the proposed period require at least 10 nights spanning 90 days. Positions average matching last-evening and first-next-morning-before-noon photos, counting each photo once; dates are photo evidence, not verified move dates. After confirmation, run the printed `homes --format textproto` command and add only confirmed entries to `~/.config/where-was-i/known-places.textproto`, preserving existing entries. The output is already the file's `KnownPlaces` format: do not estimate coordinates yourself. If no sustained home is found, ask where the user lived and when rather than inventing one. Re-run `years` with the saved file to check that the covered dates no longer show home unknown.
 - A photo shows where the camera was, not who the user was with or why they were there.
 
 where-was-i reads the library without changing it. If macOS refuses access, the error says which app needs Full Disk Access. Ask the user to grant it, or help them through System Settings if you can operate the screen.

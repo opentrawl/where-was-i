@@ -13,6 +13,7 @@ import (
 	trawlrender "github.com/opentrawl/opentrawl/trawlkit/render"
 
 	wherewasiv1 "github.com/opentrawl/where-was-i/gen/wherewasi/v1"
+	"github.com/opentrawl/where-was-i/internal/places"
 )
 
 // Command is the name people type.
@@ -661,7 +662,41 @@ func Years(out io.Writer, years *wherewasiv1.Years) error {
 	w.line("Near home: within 25 km of home but not at it. No photos: none that evening or the next morning.")
 	if unknown > 0 {
 		w.line("")
-		w.line("Home unknown: before the first home where-was-i knows about. Add earlier homes to ~/.config/%s/known-places.textproto.", Command)
+		w.line("Home unknown: no home is known for these dates.")
+		w.hint("Propose earlier homes: " + command("homes"))
+	}
+	return w.err
+}
+
+// Homes shows proposals without publishing the exact positions held in the textproto.
+func Homes(out io.Writer, homes places.Homes) error {
+	w := &writer{out: out}
+	if homes.UnknownNights == 0 {
+		w.line("No nights with an unknown home.")
+		return w.err
+	}
+	if len(homes.Proposals) == 0 {
+		w.line("No sustained home found in %s with an unknown home.", plural(homes.UnknownNights, "night", "nights"))
+	} else {
+		w.line("Proposed earlier homes · %s with an unknown home", plural(homes.UnknownNights, "night", "nights"))
+		w.line("")
+		var rows [][]string
+		for _, proposal := range homes.Proposals {
+			to := "now"
+			if proposal.Home.ValidTo != nil {
+				to = isoDate(proposal.Home.ValidTo)
+			}
+			rows = append(rows, []string{isoDate(proposal.Home.ValidFrom), to, townName(proposal.Place), proposal.Place.GetNeighbourhood(), strconv.Itoa(int(proposal.Nights)), strconv.Itoa(int(proposal.PhotoCount))})
+		}
+		w.table([]trawlrender.TableColumn{{Header: "from"}, {Header: "to"}, {Header: "town", Wrap: true}, {Header: "neighbourhood", Wrap: true}, {Header: "nights", AlignRight: true}, {Header: "photos", AlignRight: true}}, rows)
+	}
+	w.line("")
+	w.line("Rule: within %.1f km, most observed nights in a %d-day window; at least %d nights spanning %d days. Nights spent travelling are left out.", places.KnownPlaceRadiusKm, places.HomeWindowDays, places.HomeMinimumNights, places.HomeMinimumSpanDays)
+	w.line("Each proposed period also needs at least %d nights spanning %d days. Positions average matching last-evening and first-next-morning photos, counting each photo once. Dates start with the first unknown night, then the first night at each new home, and end the day before the next home starts.", places.HomeMinimumNights, places.HomeMinimumSpanDays)
+	if len(homes.Proposals) > 0 {
+		w.line("")
+		w.line("Confirm these homes and move dates with the user, then add the confirmed entries to the known-places file. This command saves nothing.")
+		w.hint("Get the entries to save: " + command("homes --format textproto"))
 	}
 	return w.err
 }

@@ -27,6 +27,9 @@ const (
 	WentToShareOfPhotos          = 0.25 // a place a day went to holds at least this share of its photos
 	InTransitKmPerHour           = 200  // faster than this between photos, both arriving and leaving, is a plane or train
 	TravellingNightKm            = 300  // evening and next-morning photos this far apart mean the night was spent travelling
+	HomeWindowDays               = 180  // propose the location with most observed nights in this window
+	HomeMinimumNights            = 10   // minimum nights at the location in both the window and the proposed home period
+	HomeMinimumSpanDays          = 90   // those nights in both window and period must span this long
 )
 
 // Date is a local calendar day, held as midnight UTC so it compares and sorts simply.

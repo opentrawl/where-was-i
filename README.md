@@ -108,13 +108,17 @@ To build it yourself, install Xcode's command-line tools and run `go install git
 
 Paste this into Claude Code, Codex or another agent that can run commands on your Mac:
 
-> Set up where-was-i on my Mac: https://github.com/opentrawl/where-was-i. Install the latest release as its README says, run `where-was-i agent-instructions` and follow them, then run `where-was-i`. If macOS stops it reading my Photos library, use computer use to open System Settings, Privacy & Security, Full Disk Access, switch it on for the app you're running in and let me approve it. Restart that app and run `where-was-i` again. Then ask me where I lived before my current home and when I moved, and write those homes to `~/.config/where-was-i/known-places.textproto`, following the repo's `examples/known-places.textproto`.
+> Set up where-was-i on my Mac: https://github.com/opentrawl/where-was-i. Install the latest release as its README says, run `where-was-i agent-instructions` and follow them, then run `where-was-i`. If macOS stops it reading my Photos library, use computer use to open System Settings, Privacy & Security, Full Disk Access, switch it on for the app you're running in and let me approve it. Restart that app and run `where-was-i` again. Then run `where-was-i homes`, ask me to confirm the homes and move dates, and add the confirmed entries from `where-was-i homes --format textproto` to `~/.config/where-was-i/known-places.textproto`.
 
 Whatever where-was-i prints goes to that agent and its model provider.
 
 ## Older trips
 
-Apple Photos knows only your current home, so trips from before you moved there are missing. To find them, list your earlier homes, and family you stay with, in `~/.config/where-was-i/known-places.textproto`:
+Apple Photos knows only your current home, so trips from before you moved there are missing. Run `where-was-i homes` to propose earlier homes from nights whose home is unknown. Each row gives the dates, Apple's town and neighbourhood, and the numbers of nights and photos behind the proposal. It saves nothing.
+
+The rule groups nights within 0.5 km and picks the place with most observed nights in a 180-day window. Both the window and the proposed home period need at least 10 nights spanning 90 days. Short stays cannot become homes. The position is the mean of the photos that place those nights: the last photo of the evening and the first of the next morning before noon, when taken at that place. Each photo is counted once. The first home starts at the first unknown night; each later home starts at its first supporting night around the change. A home's end is the day before the next home starts, including homes already known. Photos cannot establish the exact day you moved: confirm the homes and dates first.
+
+Then run `where-was-i homes --format textproto` and add the confirmed entries to `~/.config/where-was-i/known-places.textproto`. Preserve entries already in the file. The output is the file's `KnownPlaces` format, including exact positions and evidence. Family homes and other known places can be added too:
 
 ```
 places {
