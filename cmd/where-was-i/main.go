@@ -32,7 +32,7 @@ Usage:
   where-was-i days                    the latest days, one line each
   where-was-i in PLACE                your visits to a country, region, town or landmark
   where-was-i years                   nights at home, with family and away, by year
-  where-was-i homes                   propose earlier homes and workplaces from recurring photos; saves nothing
+  where-was-i known-places            propose homes and workplaces for known-places.textproto; saves nothing
   where-was-i agent-instructions      how an agent should use where-was-i
 
 Flags:
@@ -200,7 +200,7 @@ func run(args []string, out io.Writer) error {
 		return err
 	}
 	switch o.command {
-	case "", "trips", "trip", "on", "days", "in", "years", "homes":
+	case "", "trips", "trip", "on", "days", "in", "years", "known-places":
 	default:
 		return usageError{fmt.Sprintf("unknown command %q", o.command)}
 	}
@@ -267,7 +267,7 @@ func run(args []string, out io.Writer) error {
 	case "in":
 		placeDays := index.InPlace(o.argument, within, o.limit)
 		return write(out, o.format, placeDays, func() error { return render.PlaceDays(out, placeDays, o.limit) })
-	case "homes":
+	case "known-places":
 		homes := index.Homes()
 		homes.Workplaces = index.Workplaces(homes)
 		return write(out, o.format, homes.KnownPlaces(), func() error { return render.Homes(out, homes) })

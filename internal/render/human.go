@@ -663,7 +663,7 @@ func Years(out io.Writer, years *wherewasiv1.Years) error {
 	if unknown > 0 {
 		w.line("")
 		w.line("Home unknown: no home is known for these dates.")
-		w.hint("Propose earlier homes: " + command("homes"))
+		w.hint("Propose earlier homes: " + command("known-places"))
 	}
 	return w.err
 }
@@ -721,7 +721,7 @@ func Homes(out io.Writer, homes places.Homes) error {
 			}
 		}
 		w.line("Confirm these homes, workplaces and dates with the user, then save the confirmed entries in %s. This command saves nothing.", knownPlacesFile)
-		w.hint("Get the entries to save: " + command("homes --format textproto"))
+		w.hint("Get the entries to save: " + command("known-places --format textproto"))
 	}
 	return w.err
 }
