@@ -691,11 +691,11 @@ func Homes(out io.Writer, homes places.Homes) error {
 		w.table([]trawlrender.TableColumn{{Header: "from"}, {Header: "to"}, {Header: "town", Wrap: true}, {Header: "neighbourhood", Wrap: true}, {Header: "nights", AlignRight: true}, {Header: "photos", AlignRight: true}}, rows)
 	}
 	w.line("")
-	w.line("Rule: within %.1f km, most observed nights in a %d-day window; at least %d nights spanning %d days. Nights spent travelling are left out.", places.KnownPlaceRadiusKm, places.HomeWindowDays, places.HomeMinimumNights, places.HomeMinimumSpanDays)
-	w.line("Each proposed period also needs at least %d nights spanning %d days. Positions average matching last-evening and first-next-morning photos, counting each photo once. Dates start with the first unknown night, then the first night at each new home, and end the day before the next home starts.", places.HomeMinimumNights, places.HomeMinimumSpanDays)
+	w.line("How it decides: a home is the place within %.1f km where most nights were spent in a %d-day window, with at least %d nights across %d days. Nights spent travelling are left out.", places.KnownPlaceRadiusKm, places.HomeWindowDays, places.HomeMinimumNights, places.HomeMinimumSpanDays)
+	w.line("Each position is the average of the evening and next-morning photos taken there. A home starts on its first night and ends the day before the next one starts.")
 	if len(homes.Proposals) > 0 {
 		w.line("")
-		w.line("Confirm these homes and move dates with the user, then add the confirmed entries to the known-places file. This command saves nothing.")
+		w.line("Confirm these homes and move dates with the user, then save the confirmed entries in ~/.config/%s/known-places.textproto. This command saves nothing.", Command)
 		w.hint("Get the entries to save: " + command("homes --format textproto"))
 	}
 	return w.err
