@@ -2,7 +2,6 @@ package places
 
 import (
 	"fmt"
-	"strings"
 
 	wherewasiv1 "github.com/opentrawl/where-was-i/gen/wherewasi/v1"
 )
@@ -17,6 +16,7 @@ type ProposedHome struct {
 
 type Homes struct {
 	Proposals     []ProposedHome
+	Workplaces    []ProposedWorkplace
 	UnknownNights int32
 }
 
@@ -24,6 +24,9 @@ func (homes Homes) KnownPlaces() *wherewasiv1.KnownPlaces {
 	out := &wherewasiv1.KnownPlaces{}
 	for _, proposal := range homes.Proposals {
 		out.Places = append(out.Places, proposal.Home)
+	}
+	for _, proposal := range homes.Workplaces {
+		out.Places = append(out.Places, proposal.Work)
 	}
 	return out
 }
@@ -211,9 +214,7 @@ func (x *Index) Homes() Homes {
 			continue
 		}
 		var latitude, longitude float64
-		byName := map[string]int{}
-		var place *wherewasiv1.Place
-		most := 0
+		var evidencePhotos []*wherewasiv1.LocatedPhoto
 		// Preserve photo order for deterministic sums and Apple name ties.
 		for _, p := range x.photos {
 			if !photos[p.proto] {
@@ -221,18 +222,12 @@ func (x *Index) Homes() Homes {
 			}
 			latitude += p.proto.Location.Latitude
 			longitude += p.proto.Location.Longitude
-			key := townKey(p.proto.Place) + "\x00" + p.proto.Place.Neighbourhood
-			byName[key]++
-			if byName[key] > most {
-				place, most = p.proto.Place, byName[key]
-			}
+			evidencePhotos = append(evidencePhotos, p.proto)
 		}
-		label := strings.Join(nonEmpty(place.GetTown(), place.GetNeighbourhood()), " · ")
-		if label == "" {
-			label = firstNonEmptyString(place.GetCounty(), place.GetState(), place.GetCountry(), "Earlier home")
-		}
-		home := &wherewasiv1.KnownPlace{Label: label, Kind: wherewasiv1.KnownPlaceKind_KNOWN_PLACE_KIND_HOME,
-			Location: &wherewasiv1.LatLng{Latitude: latitude / float64(len(photos)), Longitude: longitude / float64(len(photos))}, ValidFrom: period.first.Proto(),
+		location := &wherewasiv1.LatLng{Latitude: latitude / float64(len(photos)), Longitude: longitude / float64(len(photos))}
+		place := proposalPlace(evidencePhotos, location)
+		home := &wherewasiv1.KnownPlace{Label: proposalLabel(place, "Earlier home"), Kind: wherewasiv1.KnownPlaceKind_KNOWN_PLACE_KIND_HOME,
+			Location: location, ValidFrom: period.first.Proto(),
 			Evidence: fmt.Sprintf("Proposed from %d nights and %d photos within %.1f km; most nights in a %d-day window, at least %d nights spanning %d days. Confirm the home and move dates.", count, len(photos), KnownPlaceRadiusKm, HomeWindowDays, HomeMinimumNights, HomeMinimumSpanDays)}
 		if bounded {
 			home.ValidTo = Date{end.AddDate(0, 0, -1)}.Proto()

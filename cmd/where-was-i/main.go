@@ -32,7 +32,7 @@ Usage:
   where-was-i days                    the latest days, one line each
   where-was-i in PLACE                your visits to a country, region, town or landmark
   where-was-i years                   nights at home, with family and away, by year
-  where-was-i homes                   propose earlier homes from nights whose home is unknown; saves nothing
+  where-was-i homes                   propose earlier homes and workplaces from recurring photos; saves nothing
   where-was-i agent-instructions      how an agent should use where-was-i
 
 Flags:
@@ -269,6 +269,7 @@ func run(args []string, out io.Writer) error {
 		return write(out, o.format, placeDays, func() error { return render.PlaceDays(out, placeDays, o.limit) })
 	case "homes":
 		homes := index.Homes()
+		homes.Workplaces = index.Workplaces(homes)
 		return write(out, o.format, homes.KnownPlaces(), func() error { return render.Homes(out, homes) })
 	default: // years
 		years := index.Years(today)

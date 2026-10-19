@@ -668,14 +668,16 @@ func Years(out io.Writer, years *wherewasiv1.Years) error {
 	return w.err
 }
 
-// Homes shows proposals without publishing the exact positions held in the textproto.
+// Homes shows home and workplace proposals, leaving exact positions to the textproto.
 func Homes(out io.Writer, homes places.Homes) error {
 	w := &writer{out: out}
-	if homes.UnknownNights == 0 {
-		w.line("No nights with an unknown home.")
+	if homes.UnknownNights == 0 && len(homes.Workplaces) == 0 {
+		w.line("No earlier homes or workplaces to propose.")
 		return w.err
 	}
-	if len(homes.Proposals) == 0 {
+	if homes.UnknownNights == 0 {
+		w.line("No nights with an unknown home.")
+	} else if len(homes.Proposals) == 0 {
 		w.line("No sustained home found in %s with an unknown home.", plural(homes.UnknownNights, "night", "nights"))
 	} else {
 		w.line("Proposed earlier homes · %s with an unknown home", plural(homes.UnknownNights, "night", "nights"))
@@ -686,16 +688,39 @@ func Homes(out io.Writer, homes places.Homes) error {
 			if proposal.Home.ValidTo != nil {
 				to = isoDate(proposal.Home.ValidTo)
 			}
-			rows = append(rows, []string{isoDate(proposal.Home.ValidFrom), to, townName(proposal.Place), proposal.Place.GetNeighbourhood(), strconv.Itoa(int(proposal.Nights)), strconv.Itoa(int(proposal.PhotoCount))})
+			rows = append(rows, []string{isoDate(proposal.Home.ValidFrom), to, townName(proposal.Place), proposal.Place.GetNeighbourhood(), proposal.Place.GetStreet(), strconv.Itoa(int(proposal.Nights)), strconv.Itoa(int(proposal.PhotoCount))})
 		}
-		w.table([]trawlrender.TableColumn{{Header: "from"}, {Header: "to"}, {Header: "town", Wrap: true}, {Header: "neighbourhood", Wrap: true}, {Header: "nights", AlignRight: true}, {Header: "photos", AlignRight: true}}, rows)
+		w.table([]trawlrender.TableColumn{{Header: "from"}, {Header: "to"}, {Header: "town", Wrap: true}, {Header: "neighbourhood", Wrap: true}, {Header: "street and number", Wrap: true}, {Header: "nights", AlignRight: true}, {Header: "photos", AlignRight: true}}, rows)
+	}
+	if homes.UnknownNights > 0 {
+		w.line("")
+		w.line("How it decides: a home is the place within %.1f km where most nights were spent in a %d-day window, with at least %d nights across %d days. Nights spent travelling are left out.", places.KnownPlaceRadiusKm, places.HomeWindowDays, places.HomeMinimumNights, places.HomeMinimumSpanDays)
+		w.line("Each position is the average of the evening and next-morning photos taken there. A home starts on its first night and ends the day before the next one starts.")
 	}
 	w.line("")
-	w.line("How it decides: a home is the place within %.1f km where most nights were spent in a %d-day window, with at least %d nights across %d days. Nights spent travelling are left out.", places.KnownPlaceRadiusKm, places.HomeWindowDays, places.HomeMinimumNights, places.HomeMinimumSpanDays)
-	w.line("Each position is the average of the evening and next-morning photos taken there. A home starts on its first night and ends the day before the next one starts.")
-	if len(homes.Proposals) > 0 {
+	if len(homes.Workplaces) == 0 {
+		w.line("No recurring weekday daytime places found away from home.")
+	} else {
+		w.line("Possible workplaces")
 		w.line("")
-		w.line("Confirm these homes and move dates with the user, then save the confirmed entries in ~/.config/%s/known-places.textproto. This command saves nothing.", Command)
+		var rows [][]string
+		for _, proposal := range homes.Workplaces {
+			rows = append(rows, []string{isoDate(proposal.Work.ValidFrom), isoDate(proposal.Work.ValidTo), townName(proposal.Place), proposal.Place.GetNeighbourhood(), proposal.Place.GetStreet(), strconv.Itoa(int(proposal.Days)), strconv.Itoa(int(proposal.PhotoCount))})
+		}
+		w.table([]trawlrender.TableColumn{{Header: "from"}, {Header: "to"}, {Header: "town", Wrap: true}, {Header: "neighbourhood", Wrap: true}, {Header: "street and number", Wrap: true}, {Header: "days", AlignRight: true}, {Header: "photos", AlignRight: true}}, rows)
+	}
+	w.line("")
+	w.line("How it decides: a possible workplace has photos within %.0f metres on at least %d weekdays in %d different weeks, across %d days within %d days. It uses Monday to Friday, %02d:00 to %02d:00, away from home, and starts a new period after %d days without a matching photo.", places.WorkplaceRadiusKm*1000, places.WorkplaceMinimumDays, places.WorkplaceMinimumWeeks, places.WorkplaceMinimumSpanDays, places.WorkplaceWindowDays, places.WorkplaceDayStartsAt, places.WorkplaceDayEndsAt, places.WorkplaceMaximumGapDays)
+	w.line("Workplace positions average those photos. Dates are the first and last photos there; regular visits can also be cafés or other places, so confirm whether each was work.")
+	if len(homes.Proposals)+len(homes.Workplaces) > 0 {
+		w.line("")
+		knownPlacesFile := "~/.config/" + Command + "/known-places.textproto"
+		for _, flag := range RepeatedFlags {
+			if flag[0] == "known-places" {
+				knownPlacesFile = flag[1]
+			}
+		}
+		w.line("Confirm these homes, workplaces and dates with the user, then save the confirmed entries in %s. This command saves nothing.", knownPlacesFile)
 		w.hint("Get the entries to save: " + command("homes --format textproto"))
 	}
 	return w.err

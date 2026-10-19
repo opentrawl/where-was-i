@@ -30,6 +30,14 @@ const (
 	HomeWindowDays               = 180  // propose the location with most observed nights in this window
 	HomeMinimumNights            = 10   // minimum nights at the location in both the window and the proposed home period
 	HomeMinimumSpanDays          = 90   // those nights in both window and period must span this long
+	WorkplaceRadiusKm            = 0.1  // group daytime photos within this distance of their group's mean position
+	WorkplaceDayStartsAt         = 9    // local weekday daytime photos, inclusive
+	WorkplaceDayEndsAt           = 18   // exclusive
+	WorkplaceWindowDays          = 180  // recurring visits must qualify within a window this long
+	WorkplaceMinimumDays         = 6    // distinct weekdays with photos in a window
+	WorkplaceMinimumWeeks        = 6    // distinct calendar weeks with photos in a window
+	WorkplaceMinimumSpanDays     = 60   // separate sustained visits from a short stay
+	WorkplaceMaximumGapDays      = 180  // longer gaps start a new period at the same place
 )
 
 // Date is a local calendar day, held as midnight UTC so it compares and sorts simply.
